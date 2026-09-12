@@ -1,1767 +1,501 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS SUPER V8 - Secure Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-:root {
-    --primary: #4f46e5; --primary-hover: #4338ca; --secondary: #0f172a;
-    --success: #10b981; --danger: #ef4444; --bg: #f1f5f9;
-    --surface: #ffffff; --border: #cbd5e1; --text: #0f172a;
-    --text-muted: #64748b; --sidebar-width: 250px; --topbar-height: 65px;
-}
-body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden;}
-
-/* LOCK SCREEN */
-.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--secondary), #334155); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.login-card { background: white; padding: 40px; border-radius: 16px; width: 350px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); text-align: center; }
-.login-header h2 { margin: 0; font-size: 24px; font-weight: 900; color: var(--secondary); }
-.login-header p { color: var(--text-muted); font-size: 14px; margin-top: 5px; margin-bottom: 25px; }
-
-/* TOP NAVBAR */
-.top-navbar { height: var(--topbar-height); background: var(--surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; box-sizing: border-box; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.03);}
-.brand { display: flex; align-items: center; gap: 10px; }
-.brand h2 { margin: 0; font-size: 20px; color: var(--secondary); font-weight: 900; letter-spacing: -0.5px;}
-.badge { background: #dbeafe; color: #1e40af; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
-.global-store-selector { display: flex; align-items: center; gap: 12px; background: #f8fafc; padding: 8px 15px; border-radius: 8px; border: 1px solid var(--border);}
-.global-store-selector label { margin: 0; font-size: 13px; font-weight: 800; color: var(--text); }
-.global-store-selector select { width: 200px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-weight: bold; cursor: pointer; background: #fff;}
-
-.app-layout { display: flex; flex: 1; height: calc(100vh - var(--topbar-height)); }
-
-/* SIDEBAR */
-.sidebar { width: var(--sidebar-width); background-color: var(--secondary); color: white; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 5;}
-.menu { padding: 25px 15px; display: flex; flex-direction: column; gap: 10px; }
-.menu-item { background: transparent; color: #94a3b8; border: none; padding: 14px 15px; text-align: left; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-.menu-item:hover { background: rgba(255,255,255,0.1); color: white; }
-.menu-item.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79,70,229,0.4); font-weight: 700;}
-.menu-item[style*="display: none"] { display: none !important; }
-
-/* MAIN CONTENT */
-.main-content { flex: 1; overflow-y: auto; padding: 25px; }
-.view-section { display: none; animation: fadeIn 0.2s ease; }
-.view-section.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-/* STAT CARDS (DASHBOARD) */
-.stat-card { padding: 25px; border-radius: 12px; background: var(--surface); box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-.stat-title { font-size: 13px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
-.stat-value { font-size: 28px; font-weight: 900; color: var(--text); }
-
-/* STORE BANNER IN KASIR */
-.store-banner { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: white; border-radius: 12px; padding: 20px 25px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2); }
-.store-banner h2 { margin: 0 0 8px 0; font-size: 24px; font-weight: 900; letter-spacing: 0.5px;}
-.store-banner-sub { font-size: 13px; display: flex; justify-content: space-between; font-weight: 500; align-items: center;}
-
-.pos-grid { display: grid; grid-template-columns: 1fr 400px; gap: 20px; height: calc(100vh - var(--topbar-height) - 50px); }
-.pos-controls { display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 10px;}
-.card { background: var(--surface); border-radius: 12px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-.mb-15 { margin-bottom: 15px; } .mt-20 { margin-top: 20px; }
-.form-group { margin-bottom: 15px; }
-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: var(--text-muted); }
-input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; box-sizing: border-box; background: #f8fafc; font-weight: 500;}
-input:focus, select:focus { outline: none; border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
-button { cursor: pointer; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; padding: 10px 15px; transition: 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 5px;}
-.btn-primary { background: var(--primary); color: white; } .btn-primary:hover { background: var(--primary-hover); }
-.btn-success { background: var(--success); color: white; } .btn-success:hover { background: #059669; }
-.btn-danger { background: var(--danger); color: white; }
-.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-.btn-sm { padding: 6px 12px; font-size: 12px; } .btn-large { padding: 15px; font-size: 16px; width: 100%; border-radius: 10px;}
-
-/* CART */
-.cart-card { flex: 1; display: flex; flex-direction: column; min-height: 200px;}
-.cart-items { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-.item-row { display: grid; grid-template-columns: 2fr 1fr 1.5fr auto; gap: 10px; align-items: end; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--border); }
-.payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-.total-display { font-size: 28px; font-weight: 900; color: var(--primary); padding: 5px 0; }
-.input-money { font-size: 22px; font-weight: 900; color: var(--success); }
-
-/* TABLES */
-.data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-.data-table th, .data-table td { padding: 14px 15px; text-align: left; border-bottom: 1px solid var(--border); font-size: 13px; }
-.data-table th { background: #f8fafc; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
-.data-table tbody tr:hover { background: #f1f5f9; }
-
-/* BADGES */
-.badge-danger { background: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;}
-.badge-success { background: #d1fae5; color: #047857; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;}
-.badge-role { background: #e0e7ff; color: #3730a3; padding: 3px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;}
-
-/* PREVIEW DESK */
-.preview-desk { background: #0f172a; border-radius: 12px; padding: 25px 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; background-image: radial-gradient(#1e293b 1px, transparent 1px); background-size: 20px 20px; box-shadow: inset 0 4px 20px rgba(0,0,0,0.5);}
-.printer-slot { width: 90mm; height: 10px; background: #000; border-radius: 5px; margin-bottom: -5px; z-index: 10; box-shadow: inset 0 2px 4px rgba(255,255,255,0.1); }
-.receipt-paper { background: #fff; width: 80mm; min-height: 100mm; padding: 6mm; box-sizing: border-box; color: #000; line-height: 1.4; box-shadow: 0 15px 35px rgba(0,0,0,0.5); position: relative; }
-.w-100 { width: 100%; } .text-center { text-align: center; } .text-right { text-align: right; } .text-left { text-align: left; }
-.bold { font-weight: bold; } .font-lg { font-size: 1.1em; } .font-xl { font-size: 1.3em; }
-
-/* THEMES CSS */
-.theme-modern { font-family: 'Segoe UI', sans-serif; font-size: 13px; }
-.theme-modern .r-logo { width: 40px; height: 40px; margin: 0 auto 10px auto; background: #000; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; font-family: 'Arial Black', sans-serif;}
-.theme-modern .r-header { border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 5px; }
-.theme-modern .r-title { font-size: 18px; font-weight: bold; text-transform: uppercase;}
-.theme-modern .r-divider { border-top: 1px dashed #666; margin: 8px 0; }
-.theme-modern table { border-collapse: collapse; } .theme-modern .r-meta { font-size: 11px; }
-
-.theme-atk { font-family: 'Trebuchet MS', sans-serif; font-size: 12px; }
-.theme-atk .r-logo { display: none; }
-.theme-atk .r-header { border-bottom: 1px dashed #333; padding-bottom: 5px; margin-bottom: 5px; }
-.theme-atk .r-title { font-size: 16px; font-weight: bold; }
-.theme-atk .r-divider { border-top: 1px dashed #333; margin: 6px 0; }
-.theme-atk table { border-collapse: collapse; }
-
-.theme-bangunan { font-family: 'Arial Black', sans-serif; font-size: 11px; font-weight: 500; }
-.theme-bangunan .r-logo { display: none; }
-.theme-bangunan * { font-family: 'Arial', sans-serif; } 
-.theme-bangunan .r-title { font-family: 'Arial Black', sans-serif; font-size: 18px; text-transform: uppercase; border: 2px solid #000; padding: 4px; display: inline-block;}
-.theme-bangunan .r-divider { border-top: 2px solid #000; margin: 6px 0; }
-.theme-bangunan table { text-transform: uppercase; border-collapse: collapse;}
-
-.theme-cafe { font-family: 'Georgia', serif; font-size: 12px; }
-.theme-cafe .r-logo { display: none; }
-.theme-cafe .r-title { font-size: 20px; font-style: italic; font-weight: normal; border-bottom: 1px solid #000; display: inline-block; padding-bottom: 5px; margin-bottom: 8px;}
-.theme-cafe .r-divider { border-top: 1px solid #000; margin: 8px 0; }
-.theme-cafe table { border-collapse: collapse; }
-
-.theme-minimarket { font-family: 'Arial', sans-serif; font-size: 11px; }
-.theme-minimarket .r-logo { display: none; }
-.theme-minimarket .r-title { font-size: 16px; font-weight: bold; }
-.theme-minimarket .r-divider { border-top: 1px dashed #000; margin: 4px 0; }
-.theme-minimarket table { border-collapse: collapse; }
-.theme-minimarket td { padding: 1px 0; }
-
-.theme-fashion { font-family: 'Helvetica Neue', Helvetica, sans-serif; font-size: 11px; font-weight: 300; }
-.theme-fashion .r-logo { display: none; }
-.theme-fashion .r-title { font-size: 15px; font-weight: 400; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 5px;}
-.theme-fashion .r-divider { border-top: 1px solid #eee; margin: 10px 0; }
-.theme-fashion table { border-collapse: collapse; text-transform: uppercase; font-size: 10px; }
-
-.theme-apotek { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; }
-.theme-apotek .r-logo { display: none; }
-.theme-apotek .r-header { border-bottom: 3px double #000; padding-bottom: 5px; margin-bottom: 5px;}
-.theme-apotek .r-title { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
-.theme-apotek .r-divider { border-top: 1px solid #000; margin: 6px 0; }
-.theme-apotek table { border-collapse: collapse; }
-
-.theme-resto { font-family: 'Courier New', Courier, monospace; font-size: 13px; }
-.theme-resto .r-logo { display: none; }
-.theme-resto .r-title { font-size: 18px; font-weight: bold; border: 1px dashed #000; padding: 5px; display: inline-block; margin-bottom:5px;}
-.theme-resto .r-divider { border-top: 1px dashed #000; margin: 8px 0; }
-.theme-resto table { border-collapse: collapse; }
-
-.theme-ppob { font-family: 'Lucida Console', Monaco, monospace; font-size: 10px; }
-.theme-ppob .r-logo { display: none; }
-.theme-ppob .text-center { text-align: left; }
-.theme-ppob .r-title { font-size: 14px; font-weight: bold; }
-.theme-ppob .r-divider { border-top: 1px solid #000; margin: 3px 0; }
-.theme-ppob table { border-collapse: collapse; }
-
-.theme-laundry { font-family: 'Trebuchet MS', sans-serif; font-size: 13px; }
-.theme-laundry .r-logo { display: none; }
-.theme-laundry .r-title { font-size: 22px; font-weight: 900; text-transform: uppercase; }
-.theme-laundry .r-divider { border-top: 2px dashed #000; margin: 8px 0; }
-.theme-laundry table { border-collapse: collapse; }
-.theme-laundry .font-xl { font-size: 1.6em; font-weight: 900; } 
-
-.barcode-container { margin-top: 15px; text-align: center; }
-.theme-atk .barcode-container, .theme-bangunan .barcode-container, .theme-fashion .barcode-container, .theme-ppob .barcode-container, .theme-pln .barcode-container, .theme-pdam .barcode-container { display: none; }
-.barcode { height: 30px; display: flex; justify-content: center; }
-.barcode-bar { height: 100%; background: #000; }
-.barcode-text { font-family: monospace; font-size: 11px; margin-top: 2px; letter-spacing: 1px; }
-
-@media print {
-    body * { visibility: hidden; } body { background: transparent; }
-    .print-target, .print-target * { visibility: visible; }
-    .print-target { 
-        position: absolute; 
-        left: 0; 
-        top: 0; 
-        width: 80mm !important; 
-        padding: 0 !important; 
-        margin: 0 !important; 
-        box-shadow: none !important; 
-        /* Memaksa menghilangkan margin bawaan kertas browser */
-    }
-    
-    /* Mengatur default ukuran kertas ke thermal printer di browser modern */
-    @page { 
-        size: 80mm auto; /* Lebar 80mm, panjang menyesuaikan isi */
-        margin: 0mm; 
-    }
-}
-
-/* 11. PLN */
-.theme-pln { font-family: 'Lucida Console', Monaco, monospace; font-size: 11px; }
-.theme-pln .r-logo { display: none; }
-.theme-pln .r-header::before { content: "STRUK PEMBAYARAN TAGIHAN LISTRIK"; display: block; text-align: center; font-weight: bold; border-bottom: 1px dashed #000; padding-bottom: 5px; margin-bottom: 5px; }
-.theme-pln .r-title { font-size: 14px; font-weight: bold; }
-.theme-pln .r-divider { border-top: 1px dashed #000; margin: 4px 0; }
-.theme-pln table { border-collapse: collapse; text-transform: uppercase; }
-
-/* 12. PDAM */
-.theme-pdam { font-family: 'Courier New', Courier, monospace; font-size: 11px; }
-.theme-pdam .r-logo { display: none; }
-.theme-pdam .r-header::before { content: "BUKTI PELUNASAN REKENING AIR"; display: block; text-align: center; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 5px; }
-.theme-pdam .r-title { font-size: 14px; font-weight: bold; }
-.theme-pdam .r-divider { border-top: 1px solid #000; margin: 4px 0; }
-.theme-pdam table { border-collapse: collapse; text-transform: uppercase; }
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POS Super V8 — Aplikasi Kasir Modern untuk UMKM Indonesia</title>
+<meta name="description" content="Aplikasi kasir (POS) lengkap untuk UMKM Indonesia: penjualan, stok, multi-cabang, QRIS, token PLN & PDAM. Jalan di Windows & Android, bahkan offline. Coba gratis 14 hari, mulai Rp 2.000/hari.">
+<meta name="keywords" content="aplikasi kasir, POS, software toko, kasir Android, kasir Windows, QRIS, UMKM, aplikasi toko, mesin kasir, POS Super V8">
+<meta name="theme-color" content="#16a34a">
+<!-- Open Graph (tampilan saat link dibagikan di WhatsApp/Facebook) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="POS Super V8 — Aplikasi Kasir Modern untuk UMKM">
+<meta property="og:description" content="Kasir lengkap: penjualan, stok, multi-cabang, QRIS, token PLN & PDAM. Jalan di Windows & Android, bahkan offline. Coba gratis 14 hari.">
+<meta property="og:locale" content="id_ID">
+<meta name="twitter:card" content="summary">
+<!-- Favicon emoji (tanpa file eksternal) -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
+<style>
+  :root{ --green:#16a34a; --dark:#0f172a; --slate:#64748b; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:var(--dark); line-height:1.6; }
+  a{ text-decoration:none; }
+  .container{ max-width:1100px; margin:0 auto; padding:0 20px; }
+  /* NAV */
+  nav{ position:sticky; top:0; background:rgba(255,255,255,.95); backdrop-filter:blur(8px); border-bottom:1px solid #e2e8f0; z-index:100; }
+  .nav-in{ display:flex; align-items:center; justify-content:space-between; padding:14px 20px; max-width:1100px; margin:0 auto; }
+  .logo{ font-weight:900; font-size:20px; color:var(--dark); }
+  .logo span{ color:var(--green); }
+  .nav-links{ display:flex; gap:24px; align-items:center; }
+  .nav-links a{ color:var(--slate); font-size:14px; font-weight:600; }
+  .nav-links a:hover{ color:var(--green); }
+  .btn{ display:inline-block; background:var(--green); color:#fff; padding:12px 24px; border-radius:10px; font-weight:700; font-size:15px; border:none; cursor:pointer; transition:.2s; }
+  .btn:hover{ background:#15803d; transform:translateY(-1px); }
+  .btn-lg{ padding:16px 36px; font-size:17px; }
+  .btn-outline{ background:transparent; color:var(--green); border:2px solid var(--green); }
+  /* HERO */
+  .hero{ background:linear-gradient(135deg,#f0fdf4 0%,#ecfeff 100%); padding:80px 0; }
+  .hero-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:48px; align-items:center; }
+  .badge{ display:inline-block; background:#dcfce7; color:#166534; font-size:13px; font-weight:700; padding:6px 14px; border-radius:20px; margin-bottom:18px; }
+  h1{ font-size:44px; line-height:1.15; font-weight:900; margin-bottom:18px; letter-spacing:-.5px; }
+  h1 span{ color:var(--green); }
+  .hero p{ font-size:18px; color:var(--slate); margin-bottom:28px; }
+  .hero-cta{ display:flex; gap:14px; flex-wrap:wrap; }
+  .hero-note{ margin-top:16px; font-size:13px; color:var(--slate); }
+  /* mockup struk */
+  .mock{ background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.12); padding:24px; }
+  .receipt{ font-family:'Courier New',monospace; font-size:12px; color:#111; border:1px dashed #cbd5e1; padding:16px; border-radius:8px; }
+  .receipt .c{ text-align:center; }
+  .receipt .b{ font-weight:bold; }
+  .receipt hr{ border:none; border-top:1px dashed #999; margin:6px 0; }
+  .receipt table{ width:100%; font-size:11px; }
+  .receipt .tot{ font-size:15px; font-weight:900; }
+  .qr{ width:80px; height:80px; margin:6px auto; background:
+     conic-gradient(#000 25%,#fff 0 50%,#000 0 75%,#fff 0),
+     conic-gradient(#000 25%,#fff 0 50%,#000 0 75%,#fff 0) 8px 8px; background-size:16px 16px; border:3px solid #000; }
+  /* SECTION */
+  section{ padding:72px 0; }
+  .center{ text-align:center; }
+  h2{ font-size:34px; font-weight:900; margin-bottom:12px; letter-spacing:-.5px; }
+  .lead{ font-size:17px; color:var(--slate); max-width:620px; margin:0 auto 48px; }
+  /* FEATURES */
+  .feat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  .feat{ background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:28px; transition:.2s; cursor:pointer; }
+  .feat:hover{ box-shadow:0 12px 30px rgba(0,0,0,.08); transform:translateY(-3px); border-color:#bbf7d0; }
+  .feat .ico{ font-size:34px; margin-bottom:14px; }
+  .feat h3{ font-size:18px; margin-bottom:8px; }
+  .feat p{ font-size:14px; color:var(--slate); }
+  .feat-more{ max-height:0; overflow:hidden; transition:max-height .35s ease; }
+  .feat-more ul{ list-style:none; margin:14px 0 4px; padding:0; }
+  .feat-more li{ font-size:13.5px; color:#334155; padding:6px 0 6px 24px; position:relative; border-top:1px solid #f1f5f9; }
+  .feat-more li:first-child{ border-top:none; }
+  .feat-more li::before{ content:'✓'; position:absolute; left:0; color:var(--green); font-weight:900; }
+  .feat.open .feat-more{ max-height:400px; }
+  .feat-toggle{ display:inline-block; margin-top:14px; color:var(--green); font-size:13px; font-weight:700; }
+  .feat.open .feat-toggle::after{ content:''; }
+  .feat.open .feat-toggle{ color:#15803d; }
+  /* WHY / strip */
+  .strip{ background:var(--dark); color:#fff; }
+  .strip .feat-grid{ grid-template-columns:repeat(4,1fr); }
+  .stat{ text-align:center; }
+  .stat .n{ font-size:40px; font-weight:900; color:#4ade80; }
+  .stat .l{ font-size:14px; color:#94a3b8; }
+  /* DOWNLOAD */
+  .dl-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:24px; max-width:760px; margin:0 auto; }
+  .dl-card{ background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:32px 26px; box-shadow:0 8px 24px rgba(0,0,0,.06); }
+  .dl-card .dl-ico{ font-size:48px; margin-bottom:10px; }
+  .dl-card h3{ font-size:20px; margin-bottom:8px; }
+  .dl-card p{ font-size:14px; color:var(--slate); margin-bottom:20px; }
+  .dl-note{ font-size:12px; color:var(--slate); margin-top:12px; }
+  /* PANDUAN */
+  .guide-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:20px; text-align:left; }
+  .guide{ background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:24px; transition:.2s; color:var(--dark); display:flex; flex-direction:column; }
+  .guide:hover{ box-shadow:0 12px 30px rgba(0,0,0,.08); transform:translateY(-3px); border-color:#bbf7d0; }
+  .guide .g-ico{ font-size:34px; margin-bottom:12px; }
+  .guide h3{ font-size:17px; margin-bottom:6px; }
+  .guide p{ font-size:13.5px; color:var(--slate); flex:1; }
+  .guide .g-btn{ margin-top:14px; color:var(--green); font-size:13px; font-weight:800; }
+  /* PRICING */
+  .price-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:20px; align-items:stretch; }
+  .price{ background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:32px 26px; display:flex; flex-direction:column; }
+  .price.pop{ border:2px solid var(--green); box-shadow:0 16px 40px rgba(22,163,74,.15); position:relative; }
+  .price.pop::before{ content:'PALING LARIS'; position:absolute; top:-13px; left:50%; transform:translateX(-50%); background:var(--green); color:#fff; font-size:11px; font-weight:800; padding:5px 16px; border-radius:20px; }
+  .price h3{ font-size:20px; margin-bottom:6px; }
+  .price .amt{ font-size:38px; font-weight:900; margin:10px 0; }
+  .price .amt small{ font-size:15px; color:var(--slate); font-weight:600; }
+  .price ul{ list-style:none; margin:18px 0; flex:1; }
+  .price li{ font-size:14px; padding:7px 0; padding-left:26px; position:relative; color:#334155; }
+  .price li::before{ content:'✓'; position:absolute; left:0; color:var(--green); font-weight:900; }
+  /* FAQ */
+  .faq{ max-width:760px; margin:0 auto; }
+  .qa{ border-bottom:1px solid #e2e8f0; padding:20px 0; }
+  .qa h4{ font-size:17px; margin-bottom:8px; }
+  .qa p{ font-size:15px; color:var(--slate); }
+  /* CTA */
+  .cta{ background:linear-gradient(135deg,var(--green),#0d9488); color:#fff; text-align:center; }
+  .cta h2{ color:#fff; }
+  .cta p{ font-size:18px; opacity:.95; margin-bottom:28px; }
+  .cta .btn{ background:#fff; color:var(--green); }
+  /* FOOTER */
+  footer{ background:var(--dark); color:#94a3b8; padding:40px 0; text-align:center; font-size:14px; }
+  footer .logo{ color:#fff; margin-bottom:10px; }
+  @media(max-width:820px){
+    .hero-grid,.feat-grid,.price-grid,.dl-grid,.guide-grid{ grid-template-columns:1fr; }
+    .strip .feat-grid{ grid-template-columns:repeat(2,1fr); }
+    h1{ font-size:32px; } h2{ font-size:26px; }
+    .nav-links a:not(.btn){ display:none; }
+  }
 </style>
 </head>
 <body>
 
-<!-- =========================================
-     LOCK SCREEN (LOGIN)
-     ========================================= -->
-<div id="login-screen" class="login-overlay">
-    <div class="login-card">
-        <div class="login-header">
-            <span style="font-size: 32px; margin-bottom: 10px; display: block;">🔐</span>
-            <h2>POS TERINTEGRASI</h2>
-            <p>Silakan login untuk melanjutkan</p>
-        </div>
-        
-        <!-- Pilihan Cabang di Layar Login -->
-        <div class="form-group">
-            <label style="text-align: left;">Lokasi / Cabang Bertugas:</label>
-            <select id="login-storeSelect" style="background: #f8fafc; border: 1px solid #cbd5e1;"></select>
-        </div>
-
-        <div class="form-group">
-            <label style="text-align: left;">Username</label>
-            <input type="text" id="login-username" placeholder="Masukkan username..." autocomplete="off">
-        </div>
-        <div class="form-group">
-            <label style="text-align: left;">PIN / Password</label>
-            <input type="password" id="login-password" placeholder="Masukkan PIN..." autocomplete="off" onkeypress="handleLoginEnter(event)">
-        </div>
-        <button class="btn-primary" style="width: 100%; padding: 12px; font-size: 16px; margin-top: 10px;" onclick="processLogin()">LOGIN</button>
-        <div id="login-error" style="color: var(--danger); font-size: 13px; margin-top: 15px; font-weight: bold; display: none;">Username atau PIN salah!</div>
-        
-        <div style="margin-top: 25px; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-            <strong>Info Default Akun:</strong><br>
-            Owner: <code style="background:#eee; padding:2px 4px;">admin</code> / PIN: <code style="background:#eee; padding:2px 4px;">1234</code><br>
-            Kasir: <code style="background:#eee; padding:2px 4px;">kasir1</code> / PIN: <code style="background:#eee; padding:2px 4px;">0000</code>
-        </div>
+<nav>
+  <div class="nav-in">
+    <div class="logo">POS <span>Super V8</span></div>
+    <div class="nav-links">
+      <a href="#fitur">Fitur</a>
+      <a href="#download">Download</a>
+      <a href="#panduan">Panduan</a>
+      <a href="#harga">Harga</a>
+      <a href="#faq">FAQ</a>
+      <a href="#download" class="btn">Coba Gratis</a>
     </div>
-</div>
+  </div>
+</nav>
 
-<!-- =========================================
-     APP CONTENT (HIDDEN BY DEFAULT)
-     ========================================= -->
-<div id="app-content" style="display: none; height: 100vh; flex-direction: column;">
-    
-    <!-- GLOBAL TOP NAVIGATION -->
-    <div class="top-navbar">
-        <div class="brand">
-            <span style="font-size: 24px;">⚡</span>
-            <h2 style="background: -webkit-linear-gradient(#f59e0b, #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">POS SUPER V8</h2>
-            <span id="system-status" class="badge">Mode Web</span>
-        </div>
-        
-        <div class="global-store-selector" id="top-store-selector">
-            <label for="globalStoreSelect">📍 Cabang Aktif:</label>
-            <select id="globalStoreSelect" onchange="changeGlobalStore()">
-                <!-- Diisi otomatis oleh JS -->
-            </select>
-            <button class="btn-primary btn-sm admin-only" onclick="createNewStore()">+ Cabang Baru</button>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <div style="text-align: right; line-height: 1.2;">
-                <div style="font-size: 11px; color: var(--text-muted); font-weight: 600;">LOGGED IN AS</div>
-                <div id="nav-user-name" style="font-size: 14px; font-weight: 800; color: var(--primary);">Username</div>
-                <div id="nav-user-role" style="font-size: 10px; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px;">Role</div>
-            </div>
-            <button class="btn-danger btn-sm" onclick="processLogout()">🚪 LOGOUT</button>
-        </div>
+<!-- HERO -->
+<header class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="badge">🇮🇩 Buatan Lokal · Untuk UMKM Indonesia</span>
+      <h1>Kasir Modern,<br><span>Tanpa Ribet.</span></h1>
+      <p>Aplikasi POS lengkap untuk toko Anda: penjualan, stok, multi-cabang, tagihan PLN &amp; PDAM, sampai pembayaran QRIS — semua dalam satu aplikasi. Jalan di Windows &amp; Android, bahkan tanpa internet.</p>
+      <div class="hero-cta">
+        <a href="#download" class="btn btn-lg">🚀 Coba Gratis 14 Hari</a>
+        <a href="#harga" class="btn btn-lg btn-outline">Lihat Harga</a>
+      </div>
+      <div class="hero-note">✅ Tanpa kartu kredit · ✅ Data tersimpan di perangkat Anda · ✅ Bisa offline</div>
     </div>
-
-    <div class="app-layout">
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <nav class="menu">
-                <div style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-left: 5px; margin-bottom: -5px;">Menu Utama</div>
-                <button class="menu-item admin-only" onclick="switchTab('dashboard-view', this)">📊 Dashboard</button>
-                <button class="menu-item active" onclick="switchTab('pos-view', this)">🛒 Kasir (POS)</button>
-                
-                <div style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-left: 5px; margin-bottom: -5px; margin-top: 5px;">PPOB & Tagihan</div>
-                <button class="menu-item" onclick="switchTab('ppob-pln-view', this)">⚡ Tagihan PLN</button>
-                <button class="menu-item" onclick="switchTab('ppob-pdam-view', this)">💧 Tagihan PDAM</button>
-                
-                <div class="admin-only" style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-left: 5px; margin-bottom: -5px; margin-top: 5px;">Manajemen</div>
-                <button class="menu-item admin-only" onclick="switchTab('products-view', this)">📦 Master Barang</button>
-                <button class="menu-item admin-only" onclick="switchTab('history-view', this)">📜 Riwayat Penjualan</button>
-                <button class="menu-item admin-only" onclick="switchTab('settings-view', this)">⚙️ Pengaturan & Akun</button>
-            </nav>
-            
-            <div style="margin-top: auto; padding: 20px; font-size: 11px; color: #64748b; text-align: center;">
-                <strong style="color: #f59e0b;">SECURE EDITION</strong><br>Protected by Role-Based Access
-            </div>
-        </aside>
-
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
-            
-            <!-- 0. DASHBOARD VIEW (ADMIN ONLY) -->
-            <div id="dashboard-view" class="view-section">
-                <div class="card mb-15" style="background: linear-gradient(135deg, var(--secondary), #0f172a); color: white;">
-                    <h2 style="margin: 0 0 5px 0;">Dashboard Pengawasan 👁️</h2>
-                    <p style="margin: 0; color: #cbd5e1; font-size: 14px;">Ringkasan operasional untuk <strong id="dash-store-name" style="color: #38bdf8;">Toko</strong> hari ini.</p>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                    <div class="card stat-card" style="border-top: 4px solid var(--success);">
-                        <div class="stat-title">Omzet Hari Ini (Cabang Aktif)</div>
-                        <div class="stat-value" style="color: var(--success);" id="dash-revenue">Rp 0</div>
-                    </div>
-                    <div class="card stat-card" style="border-top: 4px solid var(--primary);">
-                        <div class="stat-title">Jumlah Transaksi</div>
-                        <div class="stat-value" id="dash-trx-count">0</div>
-                    </div>
-                    <div class="card stat-card" style="border-top: 4px solid #f59e0b;">
-                        <div class="stat-title">Pesanan Tertunda (Hold)</div>
-                        <div class="stat-value" id="dash-hold-count">0</div>
-                    </div>
-                    <div class="card stat-card" style="border-top: 4px solid var(--danger);">
-                        <div class="stat-title">Peringatan Stok Menipis</div>
-                        <div class="stat-value" style="color: var(--danger);" id="dash-low-stock">0 Item</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header"><h3 style="margin: 0;">⚠️ Peringatan Stok (Seluruh Cabang)</h3></div>
-                    <table class="data-table">
-                        <thead><tr><th>Kode</th><th>Nama Barang</th><th>Sisa Stok</th><th>Status</th></tr></thead>
-                        <tbody id="dash-stock-table"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 1. KASIR VIEW (ALL ROLES) -->
-            <div id="pos-view" class="view-section active">
-                <div class="pos-grid">
-                    <div class="pos-controls">
-                        <!-- HEADER KASIR -->
-                        <div class="store-banner">
-                            <h2 id="pos-active-store-name">NAMA TOKO</h2>
-                            <div class="store-banner-sub">
-                                <span id="pos-active-store-cashier">Petugas: -</span>
-                                <button class="btn-outline btn-sm" style="color: white; border-color: rgba(255,255,255,0.5);" onclick="showHoldBills()">Pesanan Tertunda (<span id="hold-badge">0</span>)</button>
-                            </div>
-                        </div>
-
-                        <div class="card mb-15">
-                            <div class="card-header"><h3 style="margin: 0;">Pilih Barang</h3></div>
-                            <div style="display: flex; gap: 10px; margin-bottom: 5px;">
-                                <select id="productSelect" style="flex: 1;"></select>
-                                <button class="btn-primary" onclick="addFromProductDB()">+ Tambah</button>
-                            </div>
-                        </div>
-                        
-                        <div class="card cart-card mb-15">
-                            <div class="card-header">
-                                <h3 style="margin: 0;">🛒 Keranjang</h3>
-                                <div>
-                                    <button class="btn-outline btn-sm" style="color: #f59e0b; border-color: #f59e0b;" onclick="holdCurrentCart()">⏸️ Tunda</button>
-                                    <button class="btn-outline btn-sm admin-only" onclick="addItemManual()">+ Manual</button>
-                                </div>
-                            </div>
-                            <div id="itemsContainer" class="cart-items"></div>
-                        </div>
-                        
-                        <div class="card payment-card">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                                <div><label>Diskon (%)</label><input type="number" id="discountInput" value="0" min="0" max="100" oninput="updateReceipt()"></div>
-                                <div><label>Pajak/PPN (%)</label><input type="number" id="taxInput" value="0" min="0" oninput="updateReceipt()"></div>
-                                <div><label>Metode</label>
-                                    <select id="paymentMethod" onchange="updateReceipt()">
-                                        <option value="Tunai">Tunai</option>
-                                        <option value="QRIS">QRIS</option>
-                                        <option value="Transfer">Transfer</option>
-                                        <option value="Debit">Debit/Kredit</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="payment-grid" style="grid-template-columns: 1.5fr 1fr; align-items: end;">
-                                <div>
-                                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 5px;">
-                                        <span>Subtotal:</span> <span id="display-subtotal" class="bold">Rp 0</span>
-                                    </div>
-                                    <label style="color: var(--primary); font-weight: 800;">GRAND TOTAL</label>
-                                    <div class="total-display" id="display-total">Rp 0</div>
-                                </div>
-                                <div>
-                                    <label>Tunai Diterima</label>
-                                    <input type="number" id="cashGiven" value="0" class="input-money" oninput="updateReceipt()">
-                                </div>
-                            </div>
-                            <button class="btn-success btn-large" style="font-weight: 900; font-size: 18px; letter-spacing: 1px;" onclick="processPayment()">💳 BAYAR & CETAK</button>
-                        </div>
-                    </div>
-                    
-                    <div class="preview-desk">
-                        <h3 style="color: white; margin-top: 0; font-weight: 400; font-size: 14px; letter-spacing: 1px;">Live Preview (80mm)</h3>
-                        <div class="printer-slot"></div>
-                        
-                        <!-- KERTAS STRUK -->
-                        <div class="receipt-paper theme-modern" id="printArea" class="receipt-paper theme-modern print-target">
-                            <div class="r-logo" id="r-logo">TK</div>
-                            <div class="r-header text-center">
-                                <div class="r-title" id="r-storeName">NAMA TOKO</div>
-                                <div id="r-storeAddress">Alamat Toko</div>
-                            </div>
-                            <div class="r-divider"></div>
-                            <table class="w-100 r-meta">
-                                <tr><td class="text-left">No: <span id="r-trx" class="bold"></span></td></tr>
-                                <tr><td class="text-left">Tgl: <span id="r-date"></span></td><td class="text-right">Ksr: <span id="r-cashier"></span></td></tr>
-                            </table>
-                            <div class="r-divider"></div>
-                            <table class="w-100" id="r-items"></table>
-                            <div class="r-divider" style="border-top-style: solid; border-top-width: 2px;"></div>
-                            
-                            <table class="w-100" style="margin-bottom: 5px;">
-                                <tr id="row-subtotal" style="display:none;"><td style="font-size: 11px;">Subtotal</td><td class="text-right" style="font-size: 11px;" id="r-subtotal">Rp 0</td></tr>
-                                <tr id="row-discount" style="display:none;"><td style="font-size: 11px;">Diskon (<span id="r-disc-pct">0</span>%)</td><td class="text-right" style="font-size: 11px;" id="r-disc-val">-Rp 0</td></tr>
-                                <tr id="row-tax" style="display:none;"><td style="font-size: 11px;">Pajak/PPN (<span id="r-tax-pct">0</span>%)</td><td class="text-right" style="font-size: 11px;" id="r-tax-val">+Rp 0</td></tr>
-                            </table>
-
-                            <table class="w-100">
-                                <tr><td class="bold font-lg">TOTAL</td><td class="text-right bold font-xl" id="r-total">Rp 0</td></tr>
-                                <tr><td style="padding-top: 5px;">Metode Bayar</td><td class="text-right" style="padding-top: 5px;" id="r-method">Tunai</td></tr>
-                                <tr><td>Tunai/Masuk</td><td class="text-right" id="r-cash">Rp 0</td></tr>
-                                <tr><td>Kembali</td><td class="text-right" id="r-change">Rp 0</td></tr>
-                            </table>
-                            <div class="r-divider"></div>
-                            <div class="text-center" id="r-footer" style="margin-top: 10px; font-size: 0.9em;">
-                                Terima kasih atas kunjungan Anda!<br>Simpan struk ini sebagai bukti.
-                            </div>
-                            <div class="barcode-container">
-                                <div class="barcode" id="r-barcode"></div>
-                                <div class="barcode-text" id="r-barcode-text">123456789</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            
-            <!-- PPOB PLN VIEW -->
-            <div id="ppob-pln-view" class="view-section">
-                <div class="pos-grid">
-                    <div class="pos-controls">
-                        <div class="store-banner" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                            <h2 class="dynamic-store-name">NAMA TOKO</h2>
-                            <div class="store-banner-sub"><span class="dynamic-cashier-name">Petugas: -</span><span>⚡ Loket Pembayaran PLN</span></div>
-                        </div>
-                        <div class="card mb-15">
-                            <div class="card-header"><h3 style="margin: 0; font-size: 15px;">Form Tagihan Listrik (Pascabayar)</h3></div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                <div class="form-group"><label>ID Pelanggan</label><input type="text" id="pln-idpel" value="522580308616" oninput="updatePLNReceipt()"></div>
-                                <div class="form-group"><label>Nama Pelanggan</label><input type="text" id="pln-nama" value="SD Pamengger 01" oninput="updatePLNReceipt()"></div>
-                                <div class="form-group"><label>Tarif / Daya</label><input type="text" id="pln-daya" value="S1/1300VA" oninput="updatePLNReceipt()"></div>
-                                <div class="form-group"><label>Bulan / Tahun</label><input type="text" id="pln-blth" value="Januari2026" oninput="updatePLNReceipt()"></div>
-                                <div class="form-group"><label>Tagihan PLN (Rp)</label><input type="number" id="pln-tagihan" value="222000" oninput="updatePLNReceipt()"></div>
-                                <div class="form-group"><label>Admin Bank (Rp)</label><input type="number" id="pln-admin" value="3000" oninput="updatePLNReceipt()"></div>
-                            </div>
-                        </div>
-                        <div class="card payment-card"><button class="btn-success btn-large" style="background: #f59e0b; border: none; font-weight: bold; letter-spacing: 1px;" onclick="processPLNPayment()">🖨️ CETAK STRUK PLN</button></div>
-                    </div>
-                    <div class="preview-desk">
-                        <h3 style="color: white; margin-top: 0; font-weight: 400; font-size: 14px; letter-spacing: 1px;">Live Preview (80mm)</h3>
-                        <div class="printer-slot"></div>
-                        <div class="receipt-paper" id="printAreaPLN" style="padding: 10px; width: 80mm; min-height: auto;">
-                            <pre id="pln-receipt-content" style="margin: 0; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 600; line-height: 1.2;"></pre>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PPOB PDAM VIEW -->
-            <div id="ppob-pdam-view" class="view-section">
-                <div class="pos-grid">
-                    <div class="pos-controls">
-                        <div class="store-banner" style="background: linear-gradient(135deg, #0ea5e9, #0369a1);">
-                            <h2 class="dynamic-store-name">NAMA TOKO</h2>
-                            <div class="store-banner-sub"><span class="dynamic-cashier-name">Petugas: -</span><span>💧 Loket Pembayaran PDAM</span></div>
-                        </div>
-                        <div class="card mb-15">
-                            <div class="card-header"><h3 style="margin: 0; font-size: 15px;">Form Rekening Air (PDAM)</h3></div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                <div class="form-group full" style="grid-column: span 2;"><label>Wilayah PDAM</label><input type="text" id="pdam-wilayah" value="PDAM Kab. BREBES" oninput="updatePDAMReceipt()"></div>
-                                <div class="form-group"><label>Nomor Pelanggan</label><input type="text" id="pdam-idpel" value="1401180450" oninput="updatePDAMReceipt()"></div>
-                                <div class="form-group"><label>Nama Pelanggan</label><input type="text" id="pdam-nama" value="SDN PAMENGGER 01" oninput="updatePDAMReceipt()"></div>
-                                <div class="form-group"><label>Alamat</label><input type="text" id="pdam-alamat" value="Jl. Pamengger" oninput="updatePDAMReceipt()"></div>
-                                <div class="form-group"><label>Periode</label><input type="text" id="pdam-periode" value="Jan2026" oninput="updatePDAMReceipt()"></div>
-                                <div class="form-group"><label>Pemakaian (m³)</label><input type="text" id="pdam-pakai" value="59" oninput="updatePDAMReceipt()"></div>
-                                <div class="form-group"><label>Meter Lalu - Kini</label><input type="text" id="pdam-meter" value="2835 - 2894" oninput="updatePDAMReceipt()"></div>
-                                <div class="form-group"><label>Total Tagihan (Rp)</label><input type="number" id="pdam-tagihan" value="144500" oninput="updatePDAMReceipt()"></div>
-                                <div class="form-group"><label>Biaya Admin (Rp)</label><input type="number" id="pdam-admin" value="3000" oninput="updatePDAMReceipt()"></div>
-                            </div>
-                        </div>
-                        <div class="card payment-card"><button class="btn-success btn-large" style="background: #0ea5e9; border: none; font-weight: bold; letter-spacing: 1px;" onclick="processPDAMPayment()">🖨️ CETAK STRUK PDAM</button></div>
-                    </div>
-                    <div class="preview-desk">
-                        <h3 style="color: white; margin-top: 0; font-weight: 400; font-size: 14px; letter-spacing: 1px;">Live Preview (80mm)</h3>
-                        <div class="printer-slot"></div>
-                        <div class="receipt-paper" id="printAreaPDAM" style="padding: 10px; width: 80mm; min-height: auto;">
-                            <pre id="pdam-receipt-content" style="margin: 0; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 600; line-height: 1.2;"></pre>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<!-- 2. MASTER BARANG VIEW (ADMIN ONLY) -->
-            <div id="products-view" class="view-section">
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h2 style="margin:0;">📦 Database Master Barang Terpusat</h2>
-                            <p style="margin: 5px 0 0 0; font-size: 12px; color: var(--text-muted);">Memotong stok otomatis saat kasir memproses pembayaran.</p>
-                        </div>
-                        <div>
-                            <button class="btn-outline" style="color: var(--success); border-color: var(--success);" onclick="exportCSV('products')">📥 Excel</button>
-                            <button class="btn-primary" onclick="showAddProductModal()">+ Tambah Barang</button>
-                        </div>
-                    </div>
-                    <table class="data-table">
-                        <thead><tr><th>Kode</th><th>Nama Barang</th><th>Harga Jual</th><th>Stok</th><th>Status</th><th>Aksi</th></tr></thead>
-                        <tbody id="productTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 3. RIWAYAT TRANSAKSI VIEW (ADMIN ONLY) -->
-            <div id="history-view" class="view-section">
-                <div class="card">
-                    <div class="card-header" style="align-items: flex-start;">
-                        <div>
-                            <h2 style="margin:0;">📜 Laporan Riwayat Penjualan & Audit Trail</h2>
-                            <div style="margin-top: 10px; display: flex; gap: 15px; align-items: center;">
-                                <label style="margin:0; display:flex; align-items:center; gap:5px; cursor: pointer;">
-                                    <input type="radio" name="historyFilter" value="active" checked onchange="renderHistoryTable()"> Khusus Cabang Aktif
-                                </label>
-                                <label style="margin:0; display:flex; align-items:center; gap:5px; cursor: pointer;">
-                                    <input type="radio" name="historyFilter" value="all" onchange="renderHistoryTable()"> Gabungan Seluruh Cabang
-                                </label>
-                            </div>
-                        </div>
-                        <div style="text-align: right;">
-                            <button class="btn-outline mb-15" style="color: var(--success); border-color: var(--success);" onclick="exportCSV('history')">📥 Export CSV</button>
-                            <div style="font-size: 12px; color: var(--text-muted);">Total Pendapatan (Filter)</div>
-                            <div style="font-weight: 800; color: var(--success); font-size: 24px;" id="history-total-revenue">Rp 0</div>
-                        </div>
-                    </div>
-                    <table class="data-table">
-                        <thead><tr><th>Waktu</th><th>No. TRX</th><th>Cabang</th><th>Kasir (Akun)</th><th>Metode</th><th>Grand Total</th><th style="text-align:center;">Aksi</th></tr></thead>
-                        <tbody id="historyTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 4. PENGATURAN TOKO & USER (ADMIN ONLY) -->
-            <div id="settings-view" class="view-section">
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <!-- Profil Cabang -->
-                    <div class="card">
-                        <div class="card-header"><h2>⚙️ Profil Cabang Aktif</h2></div>
-                        <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--primary);">
-                            <strong style="color: var(--primary);" id="set-info-active-store">Mengedit: NAMA TOKO</strong>
-                            <span style="font-size: 11px; display:block; color: var(--text-muted);">Gunakan dropdown di Top Bar untuk mengedit cabang lain.</span>
-                        </div>
-                        <div class="form-group"><label>Nama Toko / Cabang</label><input type="text" id="set-storeName"></div>
-                        <div class="form-group"><label>Alamat / Kontak</label><input type="text" id="set-storeAddress"></div>
-                        <div class="form-group">
-                            <label>Tema & Gaya Kertas Struk</label>
-                            <select id="set-storeTheme">
-                                <option value="theme-modern">1. Modern (Logo & Barcode)</option>
-                                <option value="theme-atk">2. Gaya Klasik / ATK</option>
-                                <option value="theme-bangunan">3. Gaya Tegas / Bangunan</option>
-                                <option value="theme-cafe">4. Gaya Cafe / Estetik</option>
-                                <option value="theme-minimarket">5. Gaya Minimarket (Kompak)</option>
-                                <option value="theme-fashion">6. Gaya Butik / Fashion</option>
-                                <option value="theme-apotek">7. Gaya Apotek / Medis</option>
-                                <option value="theme-resto">8. Gaya Restoran / Mesin Tik</option>
-                                <option value="theme-ppob">9. Gaya PPOB / Rata Kiri</option>
-                                <option value="theme-laundry">10. Gaya Laundry</option>
-                                <option value="theme-pln">11. Gaya Struk PLN (Tagihan Listrik)</option>
-                                <option value="theme-pdam">12. Gaya Struk PDAM (Tagihan Air)</option>
-                            </select>
-                        </div>
-                        <button class="btn-success" onclick="saveStoreSettings()" style="width: 100%; padding: 12px; font-weight: bold;">💾 Simpan Profil</button>
-                    </div>
-
-                    <!-- Manajemen User/Akun -->
-                    <div class="card">
-                        <div class="card-header">
-                            <div>
-                                <h2 style="margin: 0;">👥 Manajemen Pengguna (Hak Akses)</h2>
-                            </div>
-                            <button class="btn-primary btn-sm" onclick="showAddUserModal()">+ Akun Baru</button>
-                        </div>
-                        <table class="data-table" style="font-size: 12px;">
-                            <thead><tr><th>Username</th><th>Peran (Role)</th><th>PIN</th><th>Aksi</th></tr></thead>
-                            <tbody id="userTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-</div>
-
-<!-- Modal Hold Bills -->
-<div id="holdModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 100; align-items:center; justify-content:center;">
-    <div class="card" style="width: 500px; max-width: 90%;">
-        <div class="card-header">
-            <h3>⏳ Daftar Pesanan Tertunda</h3>
-            <button class="btn-danger btn-sm" onclick="document.getElementById('holdModal').style.display='none'">Tutup</button>
-        </div>
-        <table class="data-table">
-            <thead><tr><th>Waktu Tahan</th><th>Kasir Bertugas</th><th>Jml Item</th><th>Aksi</th></tr></thead>
-            <tbody id="holdTableBody"></tbody>
+    <div class="mock">
+      <div class="receipt">
+        <div class="c b">TOKO BERKAH JAYA</div>
+        <div class="c" style="font-size:10px;">Jl. Merdeka No. 17, Jakarta</div>
+        <hr>
+        <div style="font-size:10px;">No : TRX-000821</div>
+        <div style="font-size:10px;">Tgl: 05/09/26 20:14 · Ksr: Siti</div>
+        <hr>
+        <table>
+          <tr><td>Beras 5kg</td><td style="text-align:right;">65.000</td></tr>
+          <tr><td>Minyak 2L</td><td style="text-align:right;">38.000</td></tr>
+          <tr><td>Gula 1kg</td><td style="text-align:right;">17.000</td></tr>
         </table>
+        <hr>
+        <table><tr><td class="tot">TOTAL</td><td class="tot" style="text-align:right;">120.000</td></tr></table>
+        <div style="font-size:10px;">Metode: QRIS</div>
+        <div class="c b" style="margin-top:8px;">SCAN QRIS UNTUK BAYAR</div>
+        <div class="qr"></div>
+        <div class="c" style="font-size:10px;">Semua bank &amp; e-wallet</div>
+        <hr>
+        <div class="c" style="font-size:10px;">Terima kasih atas kunjungan Anda!</div>
+      </div>
     </div>
-</div>
+  </div>
+</header>
+
+<!-- FEATURES -->
+<section id="fitur">
+  <div class="container center">
+    <h2>Semua yang Toko Anda Butuhkan</h2>
+    <p class="lead">Satu aplikasi menggantikan mesin kasir mahal, buku catatan, dan aplikasi terpisah.</p>
+    <div class="feat-grid" style="text-align:left;">
+      <div class="feat" onclick="toggleFeat(this)">
+        <div class="ico">🛒</div><h3>Kasir Cepat</h3>
+        <p>Transaksi kilat, hitung kembalian otomatis, diskon &amp; pajak, tahan transaksi (hold bill), cetak struk termal.</p>
+        <div class="feat-more">
+          <ul>
+            <li>Scan barcode pakai kamera HP atau alat scanner</li>
+            <li>Hitung kembalian otomatis, anti salah</li>
+            <li>Diskon per item &amp; per transaksi, pajak/PPN</li>
+            <li>Tahan transaksi (hold) saat antre ramai</li>
+            <li>Cetak struk termal 58mm &amp; 80mm</li>
+            <li>Barang belum terdaftar? Daftar kilat &amp; langsung jual</li>
+          </ul>
+        </div>
+        <span class="feat-toggle">Lihat detail ▾</span>
+      </div>
+      <div class="feat" onclick="toggleFeat(this)">
+        <div class="ico">🏬</div><h3>Multi-Cabang</h3>
+        <p>Kelola banyak toko dari satu aplikasi. Pindahkan kasir antar cabang, laporan terpisah per cabang.</p>
+        <div class="feat-more">
+          <ul>
+            <li>Tambah cabang tanpa batas dalam satu aplikasi</li>
+            <li>Laporan &amp; stok terpisah per cabang</li>
+            <li>Pindah kasir antar cabang dengan mudah</li>
+            <li>Hak akses berbeda: Admin, Kepala Toko, Kasir</li>
+          </ul>
+        </div>
+        <span class="feat-toggle">Lihat detail ▾</span>
+      </div>
+      <div class="feat" onclick="toggleFeat(this)">
+        <div class="ico">📱</div><h3>Pembayaran QRIS</h3>
+        <p>Terima DANA, OVO, GoPay, ShopeePay &amp; m-banking. QR dinamis otomatis berisi nominal — pembeli tinggal scan.</p>
+        <div class="feat-more">
+          <ul>
+            <li>QR dinamis: nominal langsung terisi otomatis</li>
+            <li>Diterima semua bank &amp; e-wallet (QRIS nasional)</li>
+            <li>Tampil di Layar Pelanggan / monitor kedua</li>
+            <li>Konfirmasi pembayaran oleh kasir</li>
+          </ul>
+        </div>
+        <span class="feat-toggle">Lihat detail ▾</span>
+      </div>
+      <div class="feat" onclick="toggleFeat(this)">
+        <div class="ico">⚡</div><h3>Tagihan PLN &amp; PDAM</h3>
+        <p>Tambah layanan pembayaran listrik &amp; air. Sumber pemasukan baru untuk toko Anda.</p>
+        <div class="feat-more">
+          <ul>
+            <li>Jual token listrik PLN prabayar</li>
+            <li>Terima pembayaran tagihan PDAM</li>
+            <li>Ambil untung dari tiap transaksi (admin fee)</li>
+            <li>Menarik pelanggan datang ke toko</li>
+          </ul>
+        </div>
+        <span class="feat-toggle">Lihat detail ▾</span>
+      </div>
+      <div class="feat" onclick="toggleFeat(this)">
+        <div class="ico">📦</div><h3>Manajemen Stok</h3>
+        <p>Master barang, stok opname, kartu stok, peringatan stok menipis, dan harga modal untuk hitung laba.</p>
+        <div class="feat-more">
+          <ul>
+            <li>Data barang lengkap: SKU, harga jual, harga modal</li>
+            <li>Stok opname &amp; kartu stok (riwayat keluar-masuk)</li>
+            <li>Peringatan otomatis saat stok menipis</li>
+            <li>Koreksi stok dengan jejak audit</li>
+          </ul>
+        </div>
+        <span class="feat-toggle">Lihat detail ▾</span>
+      </div>
+      <div class="feat" onclick="toggleFeat(this)">
+        <div class="ico">📈</div><h3>Laporan &amp; Laba</h3>
+        <p>Omzet, laba kotor, produk terlaris, grafik harian. Ekspor ke Excel &amp; PDF sekali klik.</p>
+        <div class="feat-more">
+          <ul>
+            <li>Omzet &amp; laba kotor harian otomatis</li>
+            <li>Produk terlaris &amp; kinerja kasir</li>
+            <li>Grafik penjualan harian</li>
+            <li>Ekspor ke Excel &amp; PDF sekali klik</li>
+          </ul>
+        </div>
+        <span class="feat-toggle">Lihat detail ▾</span>
+      </div>
+      <div class="feat" onclick="toggleFeat(this)">
+        <div class="ico">🧾</div><h3>Struk Bisa Diatur</h3>
+        <p>Editor struk: logo, header, footer, ukuran font, tampil/sembunyi elemen — beda-beda tiap cabang.</p>
+        <div class="feat-more">
+          <ul>
+            <li>Pasang logo &amp; nama toko di struk</li>
+            <li>Atur header, footer, &amp; ucapan terima kasih</li>
+            <li>Atur ukuran font &amp; elemen yang tampil</li>
+            <li>Pengaturan struk beda-beda tiap cabang</li>
+          </ul>
+        </div>
+        <span class="feat-toggle">Lihat detail ▾</span>
+      </div>
+      <div class="feat" onclick="toggleFeat(this)">
+        <div class="ico">💾</div><h3>Backup &amp; Restore</h3>
+        <p>Cadangkan seluruh data ke satu file. Pindah perangkat atau pulihkan kapan saja.</p>
+        <div class="feat-more">
+          <ul>
+            <li>Cadangkan semua data ke satu file</li>
+            <li>Pulihkan data kapan saja</li>
+            <li>Mudah pindah ke HP/PC baru</li>
+            <li>Aman dari kehilangan data</li>
+          </ul>
+        </div>
+        <span class="feat-toggle">Lihat detail ▾</span>
+      </div>
+      <div class="feat" onclick="toggleFeat(this)">
+        <div class="ico">🔒</div><h3>Aman &amp; Offline</h3>
+        <p>Data tersimpan di perangkat Anda, bukan server orang lain. Tetap jalan walau internet mati.</p>
+        <div class="feat-more">
+          <ul>
+            <li>Data tersimpan di perangkat Anda sendiri</li>
+            <li>Tetap jalan penuh walau internet mati</li>
+            <li>Wajib ganti kata sandi default demi keamanan</li>
+            <li>Hak akses bertingkat per pengguna</li>
+          </ul>
+        </div>
+        <span class="feat-toggle">Lihat detail ▾</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STRIP -->
+<section class="strip">
+  <div class="container">
+    <div class="feat-grid">
+      <div class="stat"><div class="n">2</div><div class="l">Platform (Windows &amp; Android)</div></div>
+      <div class="stat"><div class="n">∞</div><div class="l">Transaksi &amp; Produk</div></div>
+      <div class="stat"><div class="n">14</div><div class="l">Hari Coba Gratis</div></div>
+      <div class="stat"><div class="n">2rb</div><div class="l">Mulai dari /hari saja</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section id="download" style="background:linear-gradient(135deg,#f0fdf4 0%,#ecfeff 100%);">
+  <div class="container center">
+    <h2>Unduh &amp; Coba Gratis Sekarang</h2>
+    <p class="lead">Pasang di HP Android atau komputer Windows. Langsung bisa dipakai — <b>gratis 14 hari</b>, tanpa kartu kredit.</p>
+    <div class="dl-grid">
+      <div class="dl-card">
+        <div class="dl-ico">🤖</div>
+        <h3>Android (HP &amp; Tablet)</h3>
+        <p>Untuk kasir mobile, scan barcode pakai kamera, cetak struk via Bluetooth.</p>
+        <a href="https://github.com/baim789/pos-super-download/releases/latest/download/POS-Super-V8.apk" class="btn btn-lg">⬇️ Download APK</a>
+        <div class="dl-note">File .apk · Android 7.0+</div>
+      </div>
+      <div class="dl-card">
+        <div class="dl-ico">🖥️</div>
+        <h3>Windows (PC &amp; Laptop)</h3>
+        <p>Untuk kasir toko, cetak struk via USB/driver, layar pelanggan monitor kedua.</p>
+        <a href="https://github.com/baim789/pos-super-download/releases/latest/download/POS-Super-V8-Setup.exe" class="btn btn-lg">⬇️ Download EXE</a>
+        <div class="dl-note">File .exe · Windows 10/11 (64-bit)</div>
+      </div>
+    </div>
+    <p style="font-size:13px; color:var(--slate); margin-top:24px;">📲 Cara pasang APK: buka file → izinkan "Instal dari sumber ini" → Pasang. · 💻 Windows: buka file .exe → Next sampai selesai.</p>
+  </div>
+</section>
+
+<!-- PANDUAN PENGGUNA -->
+<section id="panduan" style="background:#f8fafc;">
+  <div class="container center">
+    <h2>Panduan Pengguna (Gratis)</h2>
+    <p class="lead">Buku panduan lengkap bergambar — pilih sesuai peran Anda. Klik untuk membuka / mengunduh (PDF).</p>
+    <div class="guide-grid">
+      <a class="guide" href="panduan/Panduan-POS-Super-V8.pdf" target="_blank" rel="noopener">
+        <div class="g-ico">📘</div>
+        <h3>Panduan Umum</h3>
+        <p>Pengenalan aplikasi & langkah pertama memakai POS Super V8.</p>
+        <span class="g-btn">Buka PDF ↗</span>
+      </a>
+      <a class="guide" href="panduan/Panduan-Kasir.pdf" target="_blank" rel="noopener">
+        <div class="g-ico">🧑‍💼</div>
+        <h3>Panduan Kasir</h3>
+        <p>Cara jualan, scan barcode, terima QRIS, cetak struk, tahan transaksi.</p>
+        <span class="g-btn">Buka PDF ↗</span>
+      </a>
+      <a class="guide" href="panduan/Panduan-Kepala-Toko.pdf" target="_blank" rel="noopener">
+        <div class="g-ico">🧑‍✈️</div>
+        <h3>Panduan Kepala Toko</h3>
+        <p>Koreksi transaksi (batal/retur/kurang bayar), stok, & pantau kasir.</p>
+        <span class="g-btn">Buka PDF ↗</span>
+      </a>
+      <a class="guide" href="panduan/Panduan-Admin-Owner.pdf" target="_blank" rel="noopener">
+        <div class="g-ico">👑</div>
+        <h3>Panduan Admin / Owner</h3>
+        <p>Kelola cabang, akun, lisensi, laporan laba, & pengaturan lengkap.</p>
+        <span class="g-btn">Buka PDF ↗</span>
+      </a>
+      <a class="guide" href="panduan/Panduan-Printer-USB-PC.pdf" target="_blank" rel="noopener">
+        <div class="g-ico">🖨️</div>
+        <h3>Panduan Printer</h3>
+        <p>Cara menghubungkan & mengatur printer termal (USB/Bluetooth).</p>
+        <span class="g-btn">Buka PDF ↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="harga">
+  <div class="container center">
+    <h2>Harga Sederhana &amp; Jujur</h2>
+    <p class="lead">Mulai dari <b>Rp 2.000/hari</b>. Pilih paket yang paling cocok untuk usaha Anda — makin lama, makin hemat.</p>
+    <div class="price-grid" style="text-align:left;">
+      <div class="price">
+        <h3>Harian</h3>
+        <div class="amt">Rp 2rb<small>/hari</small></div>
+        <ul>
+          <li>Semua fitur terbuka</li>
+          <li>Cocok untuk coba serius</li>
+          <li>Pembelian minimal 10 hari</li>
+          <li>Tanpa komitmen panjang</li>
+        </ul>
+        <a href="https://pos-lisensi.vercel.app/checkout.html" class="btn btn-outline">Pilih Harian</a>
+      </div>
+      <div class="price">
+        <h3>1 Bulan</h3>
+        <div class="amt">Rp 40rb<small>/30 hari</small></div>
+        <ul>
+          <li>Semua fitur + multi-cabang</li>
+          <li>Hemat Rp 20.000</li>
+          <li>Selalu versi terbaru</li>
+          <li>Dukungan via WhatsApp</li>
+        </ul>
+        <a href="https://pos-lisensi.vercel.app/checkout.html" class="btn btn-outline">Pilih 1 Bulan</a>
+      </div>
+      <div class="price pop">
+        <h3>1 Tahun</h3>
+        <div class="amt">Rp 400rb<small>/365 hari</small></div>
+        <ul>
+          <li>Semua fitur + multi-cabang</li>
+          <li><b>Hemat Rp 80.000</b></li>
+          <li>Hanya ± Rp 1.100/hari</li>
+          <li>Selalu versi terbaru</li>
+          <li>Dukungan via WhatsApp</li>
+        </ul>
+        <a href="https://pos-lisensi.vercel.app/checkout.html" class="btn">Pilih 1 Tahun</a>
+      </div>
+      <div class="price">
+        <h3>6 Bulan</h3>
+        <div class="amt">Rp 200rb<small>/180 hari</small></div>
+        <ul>
+          <li>Semua fitur + multi-cabang</li>
+          <li>Hemat Rp 40.000</li>
+          <li>Selalu versi terbaru</li>
+          <li>Dukungan via WhatsApp</li>
+        </ul>
+        <a href="https://pos-lisensi.vercel.app/checkout.html" class="btn btn-outline">Pilih 6 Bulan</a>
+      </div>
+      <div class="price">
+        <h3>5 Tahun</h3>
+        <div class="amt">Rp 1,8jt<small>/1825 hari</small></div>
+        <ul>
+          <li>Paket paling <b>hemat</b></li>
+          <li><b>Hemat Rp 600.000</b></li>
+          <li>Semua fitur + multi-cabang</li>
+          <li>Hanya ± Rp 1.000/hari</li>
+          <li>Dukungan prioritas</li>
+        </ul>
+        <a href="https://pos-lisensi.vercel.app/checkout.html" class="btn btn-outline">Pilih 5 Tahun</a>
+      </div>
+    </div>
+    <p style="font-size:13px; color:var(--slate); margin-top:24px;">💡 Semua paket dapat <b>coba gratis 14 hari</b> lebih dulu — tanpa kartu kredit. Diskon grosir tersedia untuk pembelian banyak perangkat.</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" style="background:#f8fafc;">
+  <div class="container">
+    <div class="center"><h2>Pertanyaan Umum</h2></div>
+    <div class="faq">
+      <div class="qa"><h4>Apakah butuh internet?</h4><p>Tidak. Aplikasi jalan penuh secara offline. Internet hanya diperlukan bila pelanggan membayar lewat QRIS (dari sisi HP pembeli).</p></div>
+      <div class="qa"><h4>Data saya disimpan di mana?</h4><p>Di perangkat Anda sendiri. Kami tidak menyimpan data penjualan Anda di server mana pun. Gunakan fitur Backup untuk mencadangkan.</p></div>
+      <div class="qa"><h4>Bisa dipakai di berapa perangkat?</h4><p>Lisensi berlaku per perangkat. Untuk banyak kasir/cabang, tersedia harga grosir.</p></div>
+      <div class="qa"><h4>Printer apa yang didukung?</h4><p>Printer termal 58mm &amp; 80mm (ESC/POS) via USB, Bluetooth, atau driver Windows. Juga bisa cetak lewat dialog printer biasa.</p></div>
+      <div class="qa"><h4>Bagaimana cara aktivasi setelah beli?</h4><p>Anda akan menerima kunci lisensi. Buka aplikasi → Pengaturan &amp; Akun → 🔑 Lisensi Aplikasi → tempel kunci → Aktifkan. Selesai!</p></div>
+      <div class="qa"><h4>Apakah menerima pembayaran QRIS kena biaya kami?</h4><p>Tidak dari aplikasi. Biaya QRIS (MDR) mengikuti penyedia QRIS Anda (mis. DANA), bukan aplikasi ini.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="kontak">
+  <div class="container">
+    <h2>Siap Modernkan Toko Anda?</h2>
+    <p>Mulai gratis hari ini. Tanpa risiko, tanpa kartu kredit.</p>
+    <a href="https://wa.me/6285600497796?text=Halo,%20saya%20mau%20beli%20POS%20Super%20V8" class="btn btn-lg">💬 Hubungi via WhatsApp</a>
+    <div style="margin-top:16px; font-size:14px; opacity:.9;">atau email: pujiraharjo.mr@gmail.com</div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="logo">POS <span style="color:#4ade80;">Super V8</span></div>
+    <p>Aplikasi Kasir Modern untuk UMKM Indonesia · Windows &amp; Android</p>
+    <p style="margin-top:10px; font-size:13px;">📱 WhatsApp: <a href="https://wa.me/6285600497796" style="color:#4ade80;">0856-0049-7796</a> · ✉️ <a href="mailto:pujiraharjo.mr@gmail.com" style="color:#4ade80;">pujiraharjo.mr@gmail.com</a></p>
+    <p style="margin-top:10px; font-size:12px; color:#64748b;">© 2026 POS Super V8 · Aplikasi Kasir Modern untuk UMKM Indonesia</p>
+  </div>
+</footer>
 
 <script>
-// --- SECURE DATABASE V8 ---
-let usersDB = [
-    { username: 'admin', pin: '1234', role: 'admin' }, // Akses Penuh
-    { username: 'kasir1', pin: '0000', role: 'kasir' } // Akses Kasir Saja
-];
-let currentUser = null; // Menyimpan siapa yang sedang login
-
-let storesDB = [
-    { id: 'T01', name: 'SUPER STORE PUSAT', address: 'Jl. Jenderal Sudirman No 1', theme: 'theme-modern' }
-];
-let activeStoreId = 'T01';
-
-let productsDB = [
-    { sku: 'P001', name: 'Kabel Data Type-C', price: 25000, stock: 100 },
-    { sku: 'P002', name: 'Adaptor Charger 20W', price: 85000, stock: 5 },
-    { sku: 'P003', name: 'Earphone Bluetooth', price: 150000, stock: 30 }
-];
-
-let cart = [];
-let holdBills = [];
-let transactions = [];
-let currentTrxId = generateTrxId();
-
-// Helper Data
-function getActiveStore() { return storesDB.find(s => s.id === activeStoreId) || storesDB[0]; }
-const isElectron = window.electronAPI !== undefined;
-function formatRupiah(number) { return new Intl.NumberFormat('id-ID').format(number); }
-function generateTrxId() { return 'TRX' + Date.now().toString().slice(-6); }
-
-// --- INITIALIZATION ---
-window.onload = () => {
-    // Load Database
-    if (localStorage.getItem('posUsersV8')) usersDB = JSON.parse(localStorage.getItem('posUsersV8'));
-    if (localStorage.getItem('posStoresDBV8')) storesDB = JSON.parse(localStorage.getItem('posStoresDBV8'));
-    if (localStorage.getItem('posActiveStoreV8')) activeStoreId = localStorage.getItem('posActiveStoreV8');
-    if (localStorage.getItem('posProductsV8')) productsDB = JSON.parse(localStorage.getItem('posProductsV8'));
-    if (localStorage.getItem('posHistoryV8')) transactions = JSON.parse(localStorage.getItem('posHistoryV8'));
-    if (localStorage.getItem('posHoldV8')) holdBills = JSON.parse(localStorage.getItem('posHoldV8'));
-
-    if(isElectron) {
-        document.getElementById('system-status').innerText = 'Mode Desktop';
-        document.getElementById('system-status').style.background = '#818cf8';
-        document.getElementById('system-status').style.color = '#fff';
-    }
-
-    // Persiapan Layar Login (Mengisi Dropdown Toko di Layar Login)
-    const loginStoreSel = document.getElementById('login-storeSelect');
-    loginStoreSel.innerHTML = '';
-    storesDB.forEach(s => { 
-        loginStoreSel.innerHTML += `<option value="${s.id}" ${s.id === activeStoreId ? 'selected' : ''}>${s.name}</option>`; 
-    });
-};
-
-// =========================================
-// SECURITY & AUTHENTICATION (NEW)
-// =========================================
-
-function handleLoginEnter(e) {
-    if(e.key === 'Enter') processLogin();
+function toggleFeat(card){
+  var open = card.classList.toggle('open');
+  var t = card.querySelector('.feat-toggle');
+  if(t) t.textContent = open ? 'Tutup detail ▴' : 'Lihat detail ▾';
 }
-
-function processLogin() {
-    const user = document.getElementById('login-username').value;
-    const pin = document.getElementById('login-password').value;
-    const selectedStore = document.getElementById('login-storeSelect').value;
-    const errorMsg = document.getElementById('login-error');
-
-    // Autentikasi
-    const foundUser = usersDB.find(u => u.username === user && u.pin === pin);
-    
-    if(foundUser) {
-        // Login Sukses
-        currentUser = foundUser;
-        activeStoreId = selectedStore; // Set toko berdasarkan pilihan di layar login
-        saveStoresToMemory(); // Simpan preferensi toko aktif
-
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('app-content').style.display = 'flex';
-        errorMsg.style.display = 'none';
-
-        // Set Info Akun di Navbar
-        document.getElementById('nav-user-name').innerText = currentUser.username.toUpperCase();
-        document.getElementById('nav-user-role').innerText = currentUser.role === 'admin' ? 'OWNER / ADMIN' : 'KASIR (STAFF)';
-        document.getElementById('nav-user-role').style.background = currentUser.role === 'admin' ? '#e0e7ff' : '#dcfce3';
-        document.getElementById('nav-user-role').style.color = currentUser.role === 'admin' ? '#3730a3' : '#166534';
-
-        applyRolePermissions();
-        
-        // Render & Sync seluruh data
-        renderGlobalStoreSelector();
-        syncAllViews(); 
-        renderProductDropdown();
-        renderProductTable();
-        renderUserTable();
-        addItemManual();
-    } else {
-        errorMsg.style.display = 'block';
-    }
-}
-
-function processLogout() {
-    currentUser = null;
-    document.getElementById('app-content').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('login-username').value = '';
-    document.getElementById('login-password').value = '';
-    
-    // Refresh pilihan toko di layar login
-    const loginStoreSel = document.getElementById('login-storeSelect');
-    loginStoreSel.innerHTML = '';
-    storesDB.forEach(s => { 
-        loginStoreSel.innerHTML += `<option value="${s.id}" ${s.id === activeStoreId ? 'selected' : ''}>${s.name}</option>`; 
-    });
-}
-
-function applyRolePermissions() {
-    const isAdmin = currentUser.role === 'admin';
-    
-    // Hide/Show Menu Items & Buttons based on Role
-    const adminElements = document.querySelectorAll('.admin-only');
-    adminElements.forEach(el => {
-        el.style.display = isAdmin ? '' : 'none';
-    });
-    
-    // Kunci Pemilihan Cabang di Navbar jika Kasir
-    document.getElementById('globalStoreSelect').disabled = !isAdmin;
-
-    // Arahkan ke tab yang tepat (Kasir untuk Staff, Dashboard untuk Admin)
-    if(isAdmin) {
-        switchTab('dashboard-view', document.querySelectorAll('.menu-item')[0]);
-    } else {
-        switchTab('pos-view', document.querySelectorAll('.menu-item')[1]);
-    }
-}
-
-
-// --- TAB NAVIGATION ---
-function switchTab(viewId, btnElement) {
-    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-    document.getElementById(viewId).classList.add('active');
-    btnElement.classList.add('active');
-    
-    if(viewId === 'dashboard-view') renderDashboard();
-}
-
-// --- GLOBAL STORE SELECTOR ---
-function renderGlobalStoreSelector() {
-    const sel = document.getElementById('globalStoreSelect');
-    sel.innerHTML = '';
-    storesDB.forEach(s => { sel.innerHTML += `<option value="${s.id}" ${s.id === activeStoreId ? 'selected' : ''}>${s.name}</option>`; });
-}
-
-function changeGlobalStore() {
-    activeStoreId = document.getElementById('globalStoreSelect').value;
-    saveStoresToMemory();
-    syncAllViews();
-}
-
-function createNewStore() {
-    const name = prompt("Masukkan Nama Toko / Cabang Baru:");
-    if(!name) return;
-    const newId = 'T' + Date.now();
-    storesDB.push({
-        id: newId, name: name.toUpperCase(), address: 'Alamat Cabang Baru', theme: 'theme-modern'
-    });
-    activeStoreId = newId;
-    saveStoresToMemory();
-    renderGlobalStoreSelector();
-    syncAllViews();
-    alert(`Cabang "${name.toUpperCase()}" berhasil dibuat!`);
-}
-
-function saveStoresToMemory() {
-    localStorage.setItem('posStoresDBV8', JSON.stringify(storesDB));
-    localStorage.setItem('posActiveStoreV8', activeStoreId);
-}
-
-// --- FUNGSI INTEGRASI ---
-function syncAllViews() {
-    const store = getActiveStore();
-    if(document.getElementById('ppob-active-store-name')) {
-        document.getElementById('ppob-active-store-name').innerText = store.name;
-        document.getElementById('ppob-active-store-cashier').innerText = "Petugas: " + (currentUser ? currentUser.username.toUpperCase() : '-');
-        if(document.getElementById('ppob-type').value !== '') updatePPOBReceipt();
-    }
-
-    
-    // Header Kasir & PPOB
-    const storeNames = document.querySelectorAll('.dynamic-store-name, #pos-active-store-name');
-    storeNames.forEach(el => el.innerText = store.name);
-    
-    const cashiers = document.querySelectorAll('.dynamic-cashier-name, #pos-active-store-cashier');
-    cashiers.forEach(el => el.innerText = "Petugas: " + (currentUser ? currentUser.username.toUpperCase() : '-'));
-
-    if(document.getElementById('pln-idpel')) updatePLNReceipt();
-    if(document.getElementById('pdam-idpel')) updatePDAMReceipt();
-
-    
-    // Settings Profile
-    document.getElementById('set-info-active-store').innerText = "Mengedit Toko: " + store.name;
-    document.getElementById('set-storeName').value = store.name;
-    document.getElementById('set-storeAddress').value = store.address;
-    document.getElementById('set-storeTheme').value = store.theme;
-
-    // Badges & Views
-    document.getElementById('hold-badge').innerText = holdBills.filter(h => h.storeId === activeStoreId).length;
-    if(currentUser && currentUser.role === 'admin') renderDashboard();
-    updateReceipt();
-    renderHistoryTable();
-}
-
-function saveStoreSettings() {
-    const store = getActiveStore();
-    store.name = document.getElementById('set-storeName').value;
-    store.address = document.getElementById('set-storeAddress').value;
-    store.theme = document.getElementById('set-storeTheme').value;
-    saveStoresToMemory();
-    renderGlobalStoreSelector(); 
-    syncAllViews(); 
-    alert(`Profil Cabang "${store.name}" berhasil diperbarui.`);
-}
-
-// --- 0. DASHBOARD ANALITIK ---
-function renderDashboard() {
-    const store = getActiveStore();
-    document.getElementById('dash-store-name').innerText = store.name;
-
-    let todayRev = 0, todayTrx = 0;
-    const todayStr = new Date().toISOString().split('T')[0];
-    
-    transactions.forEach(trx => {
-        if(trx.storeId === activeStoreId && trx.date.startsWith(todayStr)) {
-            todayRev += trx.total;
-            todayTrx++;
-        }
-    });
-
-    document.getElementById('dash-revenue').innerText = 'Rp ' + formatRupiah(todayRev);
-    document.getElementById('dash-trx-count').innerText = todayTrx;
-    document.getElementById('dash-hold-count').innerText = holdBills.filter(h => h.storeId === activeStoreId).length;
-
-    // Inventory Alerts (Global)
-    const tbody = document.getElementById('dash-stock-table');
-    tbody.innerHTML = '';
-    let lowStockCount = 0;
-    
-    productsDB.forEach(p => {
-        if(p.stock <= 10) {
-            lowStockCount++;
-            let status = p.stock === 0 ? '<span class="badge-danger">HABIS!</span>' : '<span class="badge-danger" style="background:#fef3c7; color:#b45309;">MENIPIS</span>';
-            tbody.innerHTML += `<tr><td>${p.sku}</td><td>${p.name}</td><td style="font-weight:bold; color:var(--danger);">${p.stock}</td><td>${status}</td></tr>`;
-        }
-    });
-    
-    document.getElementById('dash-low-stock').innerText = lowStockCount + ' Item';
-    if(lowStockCount === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Semua stok aman.</td></tr>';
-}
-
-// --- 1. KERANJANG & HOLD BILLS ---
-function addFromProductDB() {
-    const select = document.getElementById('productSelect');
-    if(select.value === "") return;
-    const prod = productsDB[select.value];
-    
-    if(prod.stock <= 0) return alert(`STOK HABIS!\nBarang "${prod.name}" tidak dapat ditambahkan.`);
-    
-    const existing = cart.find(c => c.name === prod.name && c.sku === prod.sku);
-    if(existing) {
-        if(existing.qty >= prod.stock) return alert(`Maksimal stok tercapai! Hanya tersisa ${prod.stock} item.`);
-        existing.qty += 1;
-    } else {
-        cart.push({ sku: prod.sku, name: prod.name, qty: 1, price: prod.price });
-    }
-    renderCart();
-}
-
-function addItemManual() { cart.push({ sku: 'MANUAL', name: '', qty: 1, price: 0 }); renderCart(); }
-function removeFromCart(idx) { cart.splice(idx, 1); renderCart(); }
-function updateCart(idx, field, value) {
-    if(field === 'qty' || field === 'price') cart[idx][field] = Number(value); else cart[idx][field] = value;
-    
-    if(field === 'qty' && cart[idx].sku !== 'MANUAL') {
-        const p = productsDB.find(p => p.sku === cart[idx].sku);
-        if(p && cart[idx].qty > p.stock) {
-            alert(`Sisa stok ${p.name} hanya ${p.stock}!`);
-            cart[idx].qty = p.stock;
-        }
-    }
-    updateReceipt();
-}
-
-function renderCart() {
-    const container = document.getElementById('itemsContainer');
-    container.innerHTML = '';
-    cart.forEach((item, index) => {
-        container.innerHTML += `
-            <div class="item-row">
-                <div><label>Barang</label><input type="text" value="${item.name}" oninput="updateCart(${index}, 'name', this.value)" ${item.sku!=='MANUAL'?'readonly style="background:#e2e8f0;"':''}></div>
-                <div><label>Qty</label><input type="number" value="${item.qty}" min="1" oninput="updateCart(${index}, 'qty', this.value)"></div>
-                <div><label>Harga</label><input type="number" value="${item.price}" oninput="updateCart(${index}, 'price', this.value)" ${item.sku!=='MANUAL' && currentUser.role==='kasir'?'readonly style="background:#e2e8f0;"':''}></div>
-                <div style="padding-bottom: 2px;"><button class="btn-danger btn-sm" onclick="removeFromCart(${index})" style="padding:10px;">X</button></div>
-            </div>`;
-    });
-    updateReceipt();
-}
-
-function holdCurrentCart() {
-    if(cart.length === 0 || (cart.length === 1 && !cart[0].name && cart[0].price === 0)) return alert("Keranjang kosong!");
-    
-    holdBills.push({
-        id: 'HOLD-' + Date.now().toString().slice(-4),
-        time: new Date().toISOString(),
-        storeId: activeStoreId,
-        cashier: currentUser.username, // Log User
-        cart: JSON.parse(JSON.stringify(cart))
-    });
-    localStorage.setItem('posHoldV8', JSON.stringify(holdBills));
-    
-    cart = []; addItemManual(); updateReceipt(); syncAllViews();
-    alert("Pesanan berhasil ditahan/disimpan sementara!");
-}
-
-function showHoldBills() {
-    const tbody = document.getElementById('holdTableBody');
-    tbody.innerHTML = '';
-    const activeHolds = holdBills.filter(h => h.storeId === activeStoreId);
-    
-    if(activeHolds.length === 0) tbody.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada pesanan tertunda.</td></tr>';
-    
-    activeHolds.forEach(h => {
-        const time = new Date(h.time).toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
-        tbody.innerHTML += `
-            <tr>
-                <td>${time}</td><td>${h.cashier}</td><td>${h.cart.length} Item</td>
-                <td><button class="btn-primary btn-sm" onclick="recallHoldBill('${h.id}')">Panggil</button></td>
-            </tr>
-        `;
-    });
-    document.getElementById('holdModal').style.display = 'flex';
-}
-
-function recallHoldBill(id) {
-    const idx = holdBills.findIndex(h => h.id === id);
-    if(idx === -1) return;
-    
-    if(cart.length > 0 && cart[0].name !== '') {
-        if(!confirm("Keranjang saat ini tidak kosong! Yakin ingin menimpa dengan pesanan tertunda?")) return;
-    }
-    
-    cart = holdBills[idx].cart;
-    holdBills.splice(idx, 1);
-    localStorage.setItem('posHoldV8', JSON.stringify(holdBills));
-    
-    document.getElementById('holdModal').style.display = 'none';
-    renderCart(); syncAllViews();
-}
-
-// --- 2. PERHITUNGAN KEUANGAN & RECEIPT ---
-function calculateTotals() {
-    let subtotal = 0;
-    cart.forEach(i => subtotal += (i.qty * i.price));
-    
-    const discPct = Number(document.getElementById('discountInput').value) || 0;
-    const taxPct = Number(document.getElementById('taxInput').value) || 0;
-    
-    const discVal = (subtotal * discPct) / 100;
-    const afterDisc = subtotal - discVal;
-    const taxVal = (afterDisc * taxPct) / 100;
-    const grandTotal = afterDisc + taxVal;
-    
-    return { subtotal, discPct, discVal, taxPct, taxVal, grandTotal };
-}
-
-function updateReceipt() {
-    const store = getActiveStore();
-    document.getElementById('printArea').className = 'receipt-paper print-target ' + store.theme;
-    document.getElementById('r-storeName').innerText = store.name;
-    document.getElementById('r-storeAddress').innerText = store.address;
-    document.getElementById('r-cashier').innerText = currentUser ? currentUser.username.toUpperCase() : '-';
-    document.getElementById('r-trx').innerText = currentTrxId;
-    
-    const words = store.name.split(' ');
-    document.getElementById('r-logo').innerText = words.length > 1 ? words[0][0]+words[1][0] : store.name.substring(0,2).toUpperCase();
-
-    document.getElementById('r-barcode-text').innerText = currentTrxId;
-    const barcodeDiv = document.getElementById('r-barcode');
-    barcodeDiv.innerHTML = '';
-    for(let i=0; i<30; i++) {
-        let bar = document.createElement('div');
-        bar.className = 'barcode-bar';
-        bar.style.width = (Math.floor(Math.random() * 3) + 1) + 'px';
-        bar.style.marginRight = Math.floor(Math.random() * 2) + 'px';
-        barcodeDiv.appendChild(bar);
-    }
-
-    const now = new Date();
-    document.getElementById('r-date').innerText = now.toLocaleString('id-ID', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-
-    const rItemsTable = document.getElementById('r-items');
-    rItemsTable.innerHTML = '';
-    
-    cart.forEach(item => {
-        if(!item.name && item.price === 0) return;
-        const sub = item.qty * item.price;
-        rItemsTable.innerHTML += `
-            <tr><td colspan="2" style="padding-top: 4px;">${item.name || 'Item'}</td></tr>
-            <tr>
-                <td style="color:#444; padding-bottom: 2px;">${item.qty} x ${formatRupiah(item.price)}</td>
-                <td class="text-right" style="padding-bottom: 2px;">${formatRupiah(sub)}</td>
-            </tr>`;
-    });
-    
-    const t = calculateTotals();
-    
-    document.getElementById('display-subtotal').innerText = 'Rp ' + formatRupiah(t.subtotal);
-    document.getElementById('display-total').innerText = 'Rp ' + formatRupiah(t.grandTotal);
-    
-    document.getElementById('row-subtotal').style.display = (t.discPct > 0 || t.taxPct > 0) ? 'table-row' : 'none';
-    document.getElementById('r-subtotal').innerText = 'Rp ' + formatRupiah(t.subtotal);
-    
-    document.getElementById('row-discount').style.display = t.discPct > 0 ? 'table-row' : 'none';
-    document.getElementById('r-disc-pct').innerText = t.discPct;
-    document.getElementById('r-disc-val').innerText = '-Rp ' + formatRupiah(t.discVal);
-    
-    document.getElementById('row-tax').style.display = t.taxPct > 0 ? 'table-row' : 'none';
-    document.getElementById('r-tax-pct').innerText = t.taxPct;
-    document.getElementById('r-tax-val').innerText = '+Rp ' + formatRupiah(t.taxVal);
-
-    document.getElementById('r-total').innerText = 'Rp ' + formatRupiah(t.grandTotal);
-    
-    const method = document.getElementById('paymentMethod').value;
-    document.getElementById('r-method').innerText = method;
-
-    let cashGiven = Number(document.getElementById('cashGiven').value);
-    let change = cashGiven - t.grandTotal;
-    if(cashGiven === 0 || method !== 'Tunai') { cashGiven = t.grandTotal; change = 0; } 
-    else if (change < 0) { change = 0; }
-
-    document.getElementById('r-cash').innerText = 'Rp ' + formatRupiah(cashGiven);
-    document.getElementById('r-change').innerText = 'Rp ' + formatRupiah(change);
-}
-
-// --- 3. PEMBAYARAN & PEMOTONGAN STOK ---
-function processPayment() {
-    const t = calculateTotals();
-    if(t.grandTotal === 0) return alert("Keranjang masih kosong!");
-
-    const method = document.getElementById('paymentMethod').value;
-    const cash = Number(document.getElementById('cashGiven').value);
-    if(method === 'Tunai' && cash > 0 && cash < t.grandTotal) return alert("Uang tunai kurang dari total belanja!");
-    
-    const store = getActiveStore();
-    let change = method === 'Tunai' ? cash - t.grandTotal : 0;
-    if (cash === 0) change = 0; 
-
-    // DEDUCT STOCK
-    cart.forEach(item => {
-        if(item.sku && item.sku !== 'MANUAL') {
-            const prod = productsDB.find(p => p.sku === item.sku);
-            if(prod) prod.stock = Math.max(0, prod.stock - item.qty);
-        }
-    });
-    localStorage.setItem('posProductsV8', JSON.stringify(productsDB));
-
-    // Audit Trail: Log Username (currentUser.username)
-    const trxData = {
-        id: currentTrxId, date: new Date().toISOString(),
-        storeId: store.id, storeName: store.name, storeAddress: store.address,
-        theme: store.theme, cashier: currentUser.username, // Akun yang login
-        subtotal: t.subtotal, discPct: t.discPct, discVal: t.discVal, taxPct: t.taxPct, taxVal: t.taxVal,
-        total: t.grandTotal, cash: cash === 0 ? t.grandTotal : cash, change: change,
-        method: method, items: JSON.parse(JSON.stringify(cart))
-    };
-    transactions.push(trxData);
-    localStorage.setItem('posHistoryV8', JSON.stringify(transactions));
-    
-    // Print (Bluetooth ESC/POS jika aktif, jika tidak dialog browser)
-    smartPrint('retail', trxData);
-
-    // Reset Kasir
-    cart = []; currentTrxId = generateTrxId(); 
-    document.getElementById('cashGiven').value = "0";
-    document.getElementById('discountInput').value = "0";
-    document.getElementById('taxInput').value = "0";
-    document.getElementById('paymentMethod').value = "Tunai";
-    
-    addItemManual(); syncAllViews(); renderProductTable();
-}
-
-// --- USER MANAGEMENT (ADMIN ONLY) ---
-function renderUserTable() {
-    const tbody = document.getElementById('userTableBody');
-    tbody.innerHTML = '';
-    usersDB.forEach((u, idx) => {
-        let roleBadge = u.role === 'admin' ? '<span class="badge-role" style="background:#e0e7ff; color:#3730a3;">Admin / Owner</span>' : '<span class="badge-role" style="background:#dcfce3; color:#166534;">Kasir</span>';
-        let actionBtn = u.username === 'admin' ? '-' : `<button class="btn-danger btn-sm" onclick="deleteUser(${idx})">Hapus</button>`;
-        
-        tbody.innerHTML += `
-            <tr>
-                <td style="font-weight:bold;">${u.username}</td>
-                <td>${roleBadge}</td>
-                <td style="font-family:monospace; letter-spacing:2px;">${u.pin}</td>
-                <td>${actionBtn}</td>
-            </tr>`;
-    });
-}
-
-function showAddUserModal() {
-    const username = prompt("Masukkan Username Baru (Tanpa Spasi):");
-    if(!username) return;
-    const pin = prompt("Masukkan PIN (Angka):");
-    if(!pin) return;
-    const roleChoice = prompt("Ketik Role (admin / kasir):", "kasir");
-    const role = roleChoice === 'admin' ? 'admin' : 'kasir';
-    
-    usersDB.push({ username, pin, role });
-    localStorage.setItem('posUsersV8', JSON.stringify(usersDB));
-    renderUserTable();
-    alert(`Akun ${username} berhasil dibuat!`);
-}
-
-function deleteUser(idx) {
-    if(confirm("Yakin ingin menghapus akun ini?")) {
-        usersDB.splice(idx, 1);
-        localStorage.setItem('posUsersV8', JSON.stringify(usersDB));
-        renderUserTable();
-    }
-}
-
-// --- MASTER BARANG RENDERING ---
-function renderProductDropdown() {
-    const select = document.getElementById('productSelect');
-    select.innerHTML = '<option value="">-- Pilih Barang dari Database --</option>';
-    productsDB.forEach((p, idx) => { select.innerHTML += `<option value="${idx}">${p.sku} - ${p.name} (Rp ${formatRupiah(p.price)})</option>`; });
-}
-
-function renderProductTable() {
-    const tbody = document.getElementById('productTableBody');
-    tbody.innerHTML = '';
-    productsDB.forEach((p, idx) => {
-        let status = '<span class="badge-success">AMAN</span>';
-        if(p.stock === 0) status = '<span class="badge-danger">HABIS</span>';
-        else if(p.stock <= 10) status = '<span class="badge-danger" style="background:#fef3c7; color:#b45309;">MENIPIS</span>';
-
-        tbody.innerHTML += `<tr><td>${p.sku}</td><td>${p.name}</td><td>Rp ${formatRupiah(p.price)}</td><td style="font-weight:bold;">${p.stock}</td><td>${status}</td><td><button class="btn-danger btn-sm" onclick="deleteProduct(${idx})">Hapus</button></td></tr>`;
-    });
-}
-
-function showAddProductModal() {
-    const name = prompt("Nama Barang Baru:");
-    if(!name) return;
-    const price = prompt("Harga Jual (Angka):", "10000");
-    const stock = prompt("Jumlah Stok Awal:", "100");
-    const sku = 'P' + Math.floor(100 + Math.random()*900);
-    productsDB.push({ sku, name, price: Number(price), stock: Number(stock) });
-    localStorage.setItem('posProductsV8', JSON.stringify(productsDB));
-    renderProductDropdown(); renderProductTable();
-}
-
-function deleteProduct(idx) {
-    if(confirm("Yakin ingin menghapus barang ini dari database?")) {
-        productsDB.splice(idx, 1);
-        localStorage.setItem('posProductsV8', JSON.stringify(productsDB));
-        renderProductDropdown(); renderProductTable();
-    }
-}
-
-// --- HISTORY & REPRINT ---
-function renderHistoryTable() {
-    const filter = document.querySelector('input[name="historyFilter"]:checked').value;
-    const tbody = document.getElementById('historyTableBody');
-    tbody.innerHTML = '';
-    let totalRevenue = 0;
-
-    let filteredTransactions = [...transactions].reverse();
-    if(filter === 'active') filteredTransactions = filteredTransactions.filter(trx => trx.storeId === activeStoreId);
-
-    filteredTransactions.forEach(trx => {
-        totalRevenue += trx.total;
-        const dateStr = new Date(trx.date).toLocaleString('id-ID', { hour:'2-digit', minute:'2-digit', day:'2-digit', month:'short' });
-        
-        let methodColor = trx.method === 'Tunai' ? 'var(--success)' : (trx.method === 'QRIS' ? '#0284c7' : '#f59e0b');
-
-        tbody.innerHTML += `
-            <tr>
-                <td>${dateStr}</td><td><span style="font-family:monospace;">${trx.id}</span></td>
-                <td><span style="font-size: 11px; background: var(--border); padding: 3px 6px; border-radius: 4px; font-weight:bold;">${trx.storeName}</span></td>
-                <td><span class="badge-role" style="background:#f1f5f9; color:#475569;">${trx.cashier}</span></td>
-                <td><span style="color:${methodColor}; font-weight:bold; font-size:12px;">${trx.method}</span></td>
-                <td style="font-weight:bold; color: var(--success);">Rp ${formatRupiah(trx.total)}</td>
-                <td style="text-align:center;"><button class="btn-primary btn-sm" onclick="reprintTrx('${trx.id}')" style="background:#0f766e;">🖨️ Cetak Ulang</button></td>
-            </tr>`;
-    });
-    document.getElementById('history-total-revenue').innerText = `Rp ${formatRupiah(totalRevenue)}`;
-}
-
-function reprintTrx(id) {
-    const trx = transactions.find(t => t.id === id);
-    if(!trx) return alert("Transaksi tidak ditemukan!");
-
-    const printArea = document.getElementById('printArea');
-    const originalHTML = printArea.innerHTML;
-    const originalClass = printArea.className;
-
-    printArea.className = 'receipt-paper ' + (trx.theme || 'theme-modern');
-    const words = trx.storeName.split(' ');
-    const logoInitials = words.length > 1 ? words[0][0]+words[1][0] : trx.storeName.substring(0,2).toUpperCase();
-    const dateFormatted = new Date(trx.date).toLocaleString('id-ID', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-
-    let itemsHTML = '';
-    trx.items.forEach(item => {
-        itemsHTML += `<tr><td colspan="2" style="padding-top: 4px;">${item.name || 'Item'}</td></tr>
-                      <tr><td style="color:#444; padding-bottom: 2px;">${item.qty} x ${formatRupiah(item.price)}</td><td class="text-right" style="padding-bottom: 2px;">${formatRupiah(item.qty * item.price)}</td></tr>`;
-    });
-
-    let extraHTML = '';
-    if(trx.discVal > 0) extraHTML += `<tr><td style="font-size:11px;">Diskon (${trx.discPct}%)</td><td class="text-right" style="font-size:11px;">-Rp ${formatRupiah(trx.discVal)}</td></tr>`;
-    if(trx.taxVal > 0) extraHTML += `<tr><td style="font-size:11px;">Pajak/PPN (${trx.taxPct}%)</td><td class="text-right" style="font-size:11px;">+Rp ${formatRupiah(trx.taxVal)}</td></tr>`;
-
-    printArea.innerHTML = `
-        <div class="r-logo">${logoInitials}</div>
-        <div class="r-header text-center"><div class="r-title">${trx.storeName}</div><div>${trx.storeAddress || ''}</div></div>
-        <div class="r-divider"></div>
-        <table class="w-100 r-meta"><tr><td class="text-left">No: <span class="bold">${trx.id}</span> (REPRINT)</td></tr>
-        <tr><td class="text-left">Tgl: <span>${dateFormatted}</span></td><td class="text-right">Ksr: <span>${trx.cashier || ''}</span></td></tr></table>
-        <div class="r-divider"></div><table class="w-100">${itemsHTML}</table><div class="r-divider" style="border-top-style: solid; border-top-width: 2px;"></div>
-        <table class="w-100" style="margin-bottom:5px;">${extraHTML}</table>
-        <table class="w-100">
-            <tr><td class="bold font-lg">TOTAL</td><td class="text-right bold font-xl">Rp ${formatRupiah(trx.total)}</td></tr>
-            <tr><td style="padding-top: 5px;">Metode Bayar</td><td class="text-right" style="padding-top: 5px;">${trx.method}</td></tr>
-            <tr><td>Tunai/Masuk</td><td class="text-right">Rp ${formatRupiah(trx.cash || trx.total)}</td></tr>
-            <tr><td>Kembali</td><td class="text-right">Rp ${formatRupiah(trx.change || 0)}</td></tr>
-        </table>
-        <div class="r-divider"></div><div class="text-center" style="margin-top: 10px; font-size: 0.9em;">Salinan Struk (Cetak Ulang)</div>
-        <div class="barcode-container" style="margin-top: 15px; text-align: center; display: block;">
-            <div style="font-family: monospace; font-size: 11px; letter-spacing: 1px;">*** ${trx.id} ***</div>
-        </div>
-    `;
-
-    if (typeof btEnabled === 'function' && btEnabled()) {
-        // cetak Bluetooth: pakai data transaksi (tandai reprint)
-        smartPrint('retail', Object.assign({}, trx, { id: trx.id + ' (REPRINT)' }));
-    } else {
-        window.print();
-    }
-    printArea.innerHTML = originalHTML; printArea.className = originalClass; updateReceipt();
-}
-
-// EXPORT EXCEL (CSV)
-function exportCSV(type) {
-    let csvContent = "data:text/csv;charset=utf-8,";
-    let filename = "";
-
-    if(type === 'products') {
-        filename = "Laporan_Master_Barang.csv";
-        csvContent += "SKU,Nama Barang,Harga Jual,Stok Tersedia\n";
-        productsDB.forEach(p => { csvContent += `"${p.sku}","${p.name}",${p.price},${p.stock}\n`; });
-    } else if (type === 'history') {
-        filename = "Laporan_Penjualan.csv";
-        csvContent += "Waktu,No TRX,Toko,Kasir,Metode,Subtotal,Diskon,Pajak,Grand Total\n";
-        
-        const filter = document.querySelector('input[name="historyFilter"]:checked').value;
-        let filtered = [...transactions];
-        if(filter === 'active') filtered = filtered.filter(trx => trx.storeId === activeStoreId);
-
-        filtered.forEach(trx => {
-            const dt = new Date(trx.date).toLocaleString('id-ID');
-            csvContent += `"${dt}","${trx.id}","${trx.storeName}","${trx.cashier}","${trx.method}",${trx.subtotal||trx.total},${trx.discVal||0},${trx.taxVal||0},${trx.total}\n`;
-        });
-    }
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", filename);
-    document.body.appendChild(link); link.click(); document.body.removeChild(link);
-}
-
-
-// =========================================
-// PPOB LOGIC (PLN & PDAM - TERPISAH)
-// =========================================
-
-function rightAlign(text, length) {
-    text = text.toString();
-    if(text.length >= length) return text;
-    return ' '.repeat(length - text.length) + text;
-}
-function padRight(text, length) {
-    text = text.toString();
-    if(text.length >= length) return text;
-    return text + ' '.repeat(length - text.length);
-}
-function centerAlign(text, length) {
-    text = text.toString();
-    if(text.length >= length) return text;
-    const left = Math.floor((length - text.length) / 2);
-    return ' '.repeat(left) + text + ' '.repeat(length - text.length - left);
-}
-function formatRp(num) {
-    return new Intl.NumberFormat('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(num);
-}
-
-// --- PLN ---
-function updatePLNReceipt() {
-    const store = getActiveStore();
-    const dateObj = new Date();
-    const dateStr = dateObj.toLocaleDateString('en-GB'); 
-    const timeStr = dateObj.toLocaleTimeString('en-GB');
-    
-    const idpel = document.getElementById('pln-idpel').value;
-    const nama = document.getElementById('pln-nama').value;
-    const daya = document.getElementById('pln-daya').value;
-    const blth = document.getElementById('pln-blth').value;
-    const tagihan = Number(document.getElementById('pln-tagihan').value);
-    const admin = Number(document.getElementById('pln-admin').value);
-    const total = tagihan + admin;
-    const ref = '200' + Date.now().toString().slice(-12);
-    
-    let text = "";
-    text += centerAlign("Bukti Transaksi Agen Brilink", 32) + "\n";
-    text += centerAlign(store.name.substring(0, 32), 32) + "\n";
-    text += centerAlign((store.address || "").substring(0, 32), 32) + "\n";
-    text += "--------------------------------\n";
-    text += dateStr + "                 " + timeStr + "\n";
-    text += "ID Merchant : 11905117\n";
-    text += "ID Outlet   : 11928661\n";
-    text += "Status Transaksi : Sukses\n";
-    text += padRight("IDPEL", 12) + ":  " + idpel + "\n";
-    text += padRight("NAMA", 12) + ":  " + nama.substring(0,15) + "\n";
-    text += padRight("TARIF/DAYA", 12) + ":  " + daya + "\n";
-    text += padRight("BL/TH", 12) + ":  " + blth + "\n";
-    text += padRight("RP/TAG PLN", 12) + ":  " + formatRp(tagihan) + "\n";
-    text += padRight("NO REF", 12) + ":  " + ref + "\n";
-    text += padRight("ADMIN BANK", 12) + ":  Rp." + rightAlign(formatRp(admin), 10) + "\n";
-    text += padRight("TOTAL BAYAR", 12) + ":  Rp." + rightAlign(formatRp(total), 10) + "\n";
-    text += "_ _ _ _ Terima Kasih _ _ _ _\n";
-    text += '"Informasi Hubungi Call Center\n';
-    text += '123 Atau Hub PLN Terdekat"\n';
-    
-    document.getElementById('pln-receipt-content').innerText = text;
-}
-
-function processPLNPayment() {
-    document.getElementById('printArea').classList.remove('print-target');
-    document.getElementById('printAreaPDAM').classList.remove('print-target');
-    document.getElementById('printAreaPLN').classList.add('print-target');
-    
-    const store = getActiveStore();
-    const tagihan = Number(document.getElementById('pln-tagihan').value);
-    const admin = Number(document.getElementById('pln-admin').value);
-    
-    const trxData = {
-        id: 'PLN-' + Date.now().toString().slice(-6), date: new Date().toISOString(),
-        storeId: store.id, storeName: store.name, cashier: currentUser ? currentUser.username : 'Admin',
-        total: tagihan + admin, method: 'Tunai', items: [{name: 'Pembayaran PLN', qty:1, price:tagihan+admin}]
-    };
-    transactions.push(trxData);
-    localStorage.setItem('posHistoryV8', JSON.stringify(transactions));
-    renderHistoryTable();
-
-    if (typeof btEnabled === 'function' && btEnabled()) {
-        smartPrint('text', document.getElementById('pln-receipt-content').innerText);
-    } else {
-        window.print();
-    }
-    
-    setTimeout(() => {
-        document.getElementById('printAreaPLN').classList.remove('print-target');
-        document.getElementById('printArea').classList.add('print-target');
-    }, 1000);
-}
-
-// --- PDAM ---
-function updatePDAMReceipt() {
-    const store = getActiveStore();
-    const dateObj = new Date();
-    const dateStr = dateObj.toLocaleDateString('en-GB');
-    const timeStr = dateObj.toLocaleTimeString('en-GB');
-    
-    const wilayah = document.getElementById('pdam-wilayah').value;
-    const idpel = document.getElementById('pdam-idpel').value;
-    const nama = document.getElementById('pdam-nama').value;
-    const alamat = document.getElementById('pdam-alamat').value;
-    const periode = document.getElementById('pdam-periode').value;
-    const pakai = document.getElementById('pdam-pakai').value;
-    const meter = document.getElementById('pdam-meter').value;
-    const tagihan = Number(document.getElementById('pdam-tagihan').value);
-    const admin = Number(document.getElementById('pdam-admin').value);
-    const total = tagihan + admin;
-    const ref = '002' + Date.now().toString().slice(-9);
-
-    let text = "";
-    text += centerAlign("Bukti Transaksi Agen Brilink", 32) + "\n";
-    text += centerAlign(store.name.substring(0, 32), 32) + "\n";
-    text += centerAlign((store.address || "").substring(0, 32), 32) + "\n";
-    text += "--------------------------------\n";
-    text += dateStr + "                 " + timeStr + "\n";
-    text += "ID Merchant : 11905117\n";
-    text += "ID Outlet   : 11928661\n";
-    text += padRight("Transaksi", 12) + ":  Pembayaran PDAM\n";
-    text += padRight("Wilayah", 12) + ":  " + wilayah.substring(0,16) + "\n";
-    text += padRight("Nomor Pelanggan", 15) + ": " + idpel + "\n";
-    text += padRight("Nama", 12) + ":  " + nama.substring(0,16) + "\n";
-    text += padRight("Alamat", 12) + ":  " + alamat.substring(0,16) + "\n";
-    text += padRight("Total Tagihan", 13) + ":Rp. " + formatRp(tagihan) + "\n";
-    text += padRight("Biaya Admin", 12) + ":  Rp." + rightAlign(formatRp(admin), 10) + "\n";
-    text += padRight("Total Bayar", 12) + ":  Rp." + rightAlign(formatRp(total), 10) + "\n";
-    text += padRight("No Reff", 12) + ":  " + ref + "\n";
-    text += padRight("Periode", 12) + ":  " + periode + "\n";
-    text += padRight("Pemakaian", 12) + ":  " + pakai + " m3\n";
-    
-    const m = meter.split('-');
-    text += padRight("Meter lalu", 12) + ":  " + (m[0] ? m[0].trim() : '') + "\n";
-    text += padRight("Meter kini", 12) + ":  " + (m[1] ? m[1].trim() : '') + "\n";
-    text += padRight("Tagihan", 12) + ":  Rp. " + formatRp(tagihan) + "\n";
-    text += padRight("Status", 12) + ":  Sukses\n";
-    text += "_ _ _ TERIMA KASIH _ _ _\n";
-    text += "Simpan resi ini sebagai bukti pe\n";
-    text += "mbayaran yang sah.\n";
-
-    document.getElementById('pdam-receipt-content').innerText = text;
-}
-
-function processPDAMPayment() {
-    document.getElementById('printArea').classList.remove('print-target');
-    document.getElementById('printAreaPLN').classList.remove('print-target');
-    document.getElementById('printAreaPDAM').classList.add('print-target');
-    
-    const store = getActiveStore();
-    const tagihan = Number(document.getElementById('pdam-tagihan').value);
-    const admin = Number(document.getElementById('pdam-admin').value);
-    
-    const trxData = {
-        id: 'PDAM-' + Date.now().toString().slice(-6), date: new Date().toISOString(),
-        storeId: store.id, storeName: store.name, cashier: currentUser ? currentUser.username : 'Admin',
-        total: tagihan + admin, method: 'Tunai', items: [{name: 'Pembayaran PDAM', qty:1, price:tagihan+admin}]
-    };
-    transactions.push(trxData);
-    localStorage.setItem('posHistoryV8', JSON.stringify(transactions));
-    renderHistoryTable();
-
-    if (typeof btEnabled === 'function' && btEnabled()) {
-        smartPrint('text', document.getElementById('pdam-receipt-content').innerText);
-    } else {
-        window.print();
-    }
-    
-    setTimeout(() => {
-        document.getElementById('printAreaPDAM').classList.remove('print-target');
-        document.getElementById('printArea').classList.add('print-target');
-    }, 1000);
-}
-
-
-/* ============================================================
-   MODUL CETAK BLUETOOTH THERMAL (ESC/POS) - 80mm
-   Ditambahkan untuk mengganti window.print() agar bisa cetak
-   LANGSUNG ke printer Bluetooth. Mendukung 3 mode:
-   1. Web Bluetooth  (Chrome Android / Chrome Windows / Edge)
-   2. Bridge APK     (Cordova/Capacitor -> window.BTPrinter)
-   3. Fallback       (window.print biasa jika BT tidak tersedia)
-   ============================================================ */
-
-const BT = {
-  device: null,
-  characteristic: null,
-  PAPER_COLS: 42,          // 80mm = 42 karakter (Font A). Ganti ke 32 untuk 58mm.
-  // UUID standar printer thermal murah (Serial Port Profile umum)
-  SERVICES: [
-    0x18f0,                                   // paling umum (RPP/Panda/Goojprt)
-    0xff00,
-    '000018f0-0000-1000-8000-00805f9b34fb',
-    '0000ff00-0000-1000-8000-00805f9b34fb',
-    '49535343-fe7d-4ae5-8fa9-9fafd205e455',  // Chipset ISSC/Microchip
-    'e7810a71-73ae-499d-8c15-faa9aef0c3f2'
-  ],
-  CHARS: [
-    0x2af1, 0xff02,
-    '00002af1-0000-1000-8000-00805f9b34fb',
-    '0000ff02-0000-1000-8000-00805f9b34fb',
-    '49535343-8841-43f4-a8d4-ecbe34729bb3',
-    'bef8d6c9-9c21-4c9e-b632-bd58c1009f9f'
-  ]
-};
-
-/* ---------- ESC/POS command helpers ---------- */
-const ESC = 0x1B, GS = 0x1D;
-function escInit()        { return [ESC, 0x40]; }                 // reset printer
-function escAlign(n)      { return [ESC, 0x61, n]; }              // 0=kiri 1=tengah 2=kanan
-function escBold(on)      { return [ESC, 0x45, on ? 1 : 0]; }
-function escSize(w, h)    { return [GS, 0x21, ((w-1)<<4) | (h-1)]; } // w,h = 1..8
-function escFeed(n)       { return [ESC, 0x64, n]; }              // feed n baris
-function escCut()         { return [GS, 0x56, 0x42, 0x00]; }      // potong (jika ada cutter)
-
-// Ubah string (Latin-1) jadi array byte
-function strBytes(s) {
-  const out = [];
-  for (let i = 0; i < s.length; i++) {
-    let c = s.charCodeAt(i);
-    out.push(c > 255 ? 63 : c); // ganti char non-latin dengan '?'
-  }
-  return out;
-}
-
-/* ---------- Builder: kumpulkan byte struk ---------- */
-class Receipt {
-  constructor() { this.bytes = []; this.push(escInit()); }
-  push(arr) { for (const b of arr) this.bytes.push(b); return this; }
-  text(s)   { return this.push(strBytes(s)); }
-  line(s='') { return this.text(s + '\n'); }
-  center(on=true) { return this.push(escAlign(on ? 1 : 0)); }
-  right()   { return this.push(escAlign(2)); }
-  left()    { return this.push(escAlign(0)); }
-  bold(on)  { return this.push(escBold(on)); }
-  size(w,h) { return this.push(escSize(w,h)); }
-  feed(n=1) { return this.push(escFeed(n)); }
-  hr(ch='-'){ return this.line(ch.repeat(BT.PAPER_COLS)); }
-  // dua kolom kiri-kanan dalam lebar kertas
-  row(left, right) {
-    left = String(left); right = String(right);
-    const space = BT.PAPER_COLS - left.length - right.length;
-    return this.line(left + (space > 0 ? ' '.repeat(space) : ' ') + right);
-  }
-  build() { return new Uint8Array(this.bytes); }
-}
-
-/* ---------- KONEKSI ---------- */
-async function btConnect() {
-  // Mode APK bridge (Cordova/Capacitor) -> pakai native, tidak perlu Web BT
-  if (window.BTPrinter && typeof window.BTPrinter.connect === 'function') {
-    return window.BTPrinter.connect();
-  }
-  if (!navigator.bluetooth) {
-    throw new Error('Web Bluetooth tidak didukung di lingkungan ini. Gunakan Chrome/Edge (HTTPS) atau build APK dengan plugin Bluetooth.');
-  }
-  BT.device = await navigator.bluetooth.requestDevice({
-    // acceptAllDevices agar semua printer muncul; filter service opsional
-    acceptAllDevices: true,
-    optionalServices: BT.SERVICES
-  });
-  const server = await BT.device.gatt.connect();
-
-  // Cari service & characteristic yang bisa di-write
-  let svc = null;
-  for (const s of BT.SERVICES) {
-    try { svc = await server.getPrimaryService(s); if (svc) break; } catch (e) {}
-  }
-  if (!svc) {
-    // fallback: ambil service pertama yang ada
-    const all = await server.getPrimaryServices();
-    svc = all[0];
-  }
-  let ch = null;
-  for (const c of BT.CHARS) {
-    try { ch = await svc.getCharacteristic(c); if (ch) break; } catch (e) {}
-  }
-  if (!ch) {
-    const chars = await svc.getCharacteristics();
-    ch = chars.find(x => x.properties.write || x.properties.writeWithoutResponse) || chars[0];
-  }
-  BT.characteristic = ch;
-  BT.device.addEventListener('gattserverdisconnected', () => {
-    BT.characteristic = null;
-    updateBtStatus();
-  });
-  updateBtStatus();
-  return true;
-}
-
-/* ---------- KIRIM DATA (dipecah agar tidak overflow buffer BLE) ---------- */
-async function btWrite(data) {
-  // Mode APK bridge
-  if (window.BTPrinter && typeof window.BTPrinter.write === 'function') {
-    return window.BTPrinter.write(data);
-  }
-  if (!BT.characteristic) throw new Error('Printer belum terhubung. Tekan "Hubungkan Printer" dulu.');
-
-  const CHUNK = 180; // BLE MTU aman
-  for (let i = 0; i < data.length; i += CHUNK) {
-    const slice = data.slice(i, i + CHUNK);
-    if (BT.characteristic.properties.writeWithoutResponse) {
-      await BT.characteristic.writeValueWithoutResponse(slice);
-    } else {
-      await BT.characteristic.writeValue(slice);
-    }
-    await new Promise(r => setTimeout(r, 20)); // jeda kecil agar buffer printer tidak penuh
-  }
-}
-
-async function btPrint(uint8) {
-  try {
-    if (!BT.characteristic && !(window.BTPrinter)) {
-      await btConnect();
-    }
-    await btWrite(uint8);
-  } catch (e) {
-    alert('Gagal cetak Bluetooth: ' + e.message);
-    console.error(e);
-  }
-}
-
-function updateBtStatus() {
-  const el = document.getElementById('bt-status');
-  if (!el) return;
-  const connected = !!BT.characteristic || !!(window.BTPrinter && window.BTPrinter.isConnected);
-  el.innerText = connected ? '🟢 Printer Terhubung' : '🔴 Printer Belum Terhubung';
-  el.style.color = connected ? '#10b981' : '#ef4444';
-}
-
-/* ============================================================
-   BUILDER STRUK -> ESC/POS
-   ============================================================ */
-
-// 1) STRUK RETAIL (dari cart / transaksi)
-function buildRetailReceipt(trx) {
-  const r = new Receipt();
-  r.center().bold(true).size(2,2).line(trx.storeName || '').size(1,1).bold(false);
-  if (trx.storeAddress) r.center().line(trx.storeAddress);
-  r.left().hr();
-  r.line('No : ' + trx.id);
-  const d = new Date(trx.date || Date.now());
-  r.row('Tgl: ' + d.toLocaleString('id-ID', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}),
-        'Ksr: ' + (trx.cashier || '-'));
-  r.hr();
-  (trx.items || []).forEach(item => {
-    if (!item.name && item.price === 0) return;
-    r.line(item.name || 'Item');
-    r.row('  ' + item.qty + ' x ' + formatRupiah(item.price), formatRupiah(item.qty * item.price));
-  });
-  r.hr();
-  if (trx.discVal > 0) r.row('Diskon (' + trx.discPct + '%)', '-' + formatRupiah(trx.discVal));
-  if (trx.taxVal > 0)  r.row('Pajak (' + trx.taxPct + '%)', '+' + formatRupiah(trx.taxVal));
-  r.bold(true).size(1,2).row('TOTAL', 'Rp ' + formatRupiah(trx.total)).size(1,1).bold(false);
-  r.row('Metode', trx.method || 'Tunai');
-  r.row('Tunai', 'Rp ' + formatRupiah(trx.cash || trx.total));
-  r.row('Kembali', 'Rp ' + formatRupiah(trx.change || 0));
-  r.hr();
-  r.center().line('Terima Kasih').line('== ' + trx.id + ' ==');
-  r.feed(3).push(escCut());
-  return r.build();
-}
-
-// 2) STRUK TEKS (PLN / PDAM) - dari teks monospace yang sudah dibuat
-function buildTextReceipt(text) {
-  const r = new Receipt();
-  r.left();
-  text.split('\n').forEach(l => r.line(l));
-  r.feed(3).push(escCut());
-  return r.build();
-}
-
-/* ============================================================
-   INTEGRASI: hubungkan ke tombol & alur pembayaran lama
-   ============================================================ */
-
-// Apakah user memilih mode cetak Bluetooth? (disimpan di localStorage)
-function btEnabled() { return localStorage.getItem('posUseBT') === '1'; }
-function setBtEnabled(v) {
-  localStorage.setItem('posUseBT', v ? '1' : '0');
-  const t = document.getElementById('bt-toggle');
-  if (t) t.checked = v;
-}
-
-// Router cetak universal: dipanggil semua alur.
-// type: 'retail' | 'text' ; payload: objek trx atau string teks
-async function smartPrint(type, payload) {
-  if (btEnabled()) {
-    const data = type === 'text' ? buildTextReceipt(payload) : buildRetailReceipt(payload);
-    await btPrint(data);
-  } else {
-    window.print(); // fallback ke dialog browser/OS (perilaku lama)
-  }
-}
-
-// Tombol "Hubungkan Printer"
-async function btConnectClick() {
-  try {
-    await btConnect();
-    alert('Printer berhasil terhubung!');
-  } catch (e) {
-    alert('Gagal menghubungkan: ' + e.message);
-  }
-}
-
-// Tombol tes cetak
-async function btTestPrint() {
-  const store = (typeof getActiveStore === 'function') ? getActiveStore() : {name:'TEST', address:''};
-  await smartPrint('retail', {
-    id: 'TEST-001', date: new Date().toISOString(),
-    storeName: store.name, storeAddress: store.address, cashier: 'TES',
-    items: [{name:'Item Contoh A', qty:2, price:15000},{name:'Item Contoh B', qty:1, price:50000}],
-    discPct:0, discVal:0, taxPct:0, taxVal:0,
-    total:80000, cash:100000, change:20000, method:'Tunai'
-  });
-}
-
-// Inject panel UI ke halaman setelah DOM siap
-function injectBtUI() {
-  if (document.getElementById('bt-panel')) return;
-  const panel = document.createElement('div');
-  panel.id = 'bt-panel';
-  panel.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:9998;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.15);font-family:Inter,sans-serif;font-size:13px;width:230px;';
-  panel.innerHTML = `
-    <div style="font-weight:800;color:#0f172a;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
-      🖨️ Printer Bluetooth
-      <span id="bt-panel-toggle" style="cursor:pointer;color:#64748b;font-weight:400;">_</span>
-    </div>
-    <div id="bt-panel-body">
-      <div id="bt-status" style="font-size:12px;font-weight:600;margin-bottom:8px;color:#ef4444;">🔴 Printer Belum Terhubung</div>
-      <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;">
-        <input type="checkbox" id="bt-toggle" onchange="setBtEnabled(this.checked)">
-        <span>Cetak via Bluetooth</span>
-      </label>
-      <button onclick="btConnectClick()" style="width:100%;padding:8px;border:none;border-radius:8px;background:#4f46e5;color:#fff;font-weight:600;cursor:pointer;margin-bottom:6px;">Hubungkan Printer</button>
-      <button onclick="btTestPrint()" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px;background:#f1f5f9;color:#0f172a;font-weight:600;cursor:pointer;">Tes Cetak</button>
-    </div>`;
-  document.body.appendChild(panel);
-  setBtEnabled(btEnabled());
-  updateBtStatus();
-  // minimize toggle
-  document.getElementById('bt-panel-toggle').onclick = () => {
-    const b = document.getElementById('bt-panel-body');
-    b.style.display = b.style.display === 'none' ? 'block' : 'none';
-  };
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', injectBtUI);
-} else {
-  injectBtUI();
-}
-
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a39b9821b88c9ce4',t:'MTc4OTE4MTMxNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
