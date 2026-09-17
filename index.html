@@ -236,6 +236,23 @@
         <span class="feat-toggle">Lihat detail ▾</span>
       </div>
       <div class="feat" onclick="toggleFeat(this)">
+        <div class="ico">🛎️</div><h3>Pesanan Keliling</h3>
+        <p>Pelayan mencatat pesanan langsung dari meja pakai HP/tablet, lalu terkirim ke kasir. Tanpa pasang aplikasi, cukup WiFi toko.</p>
+        <div class="feat-more">
+          <ul>
+            <li>Pelayan buka lewat browser HP/tablet — tanpa instal apa pun</li>
+            <li>Cari barang dari katalog &amp; harga milik kasir (selalu sinkron)</li>
+            <li>Sekali ketuk kirim, pesanan langsung masuk ke kasir</li>
+            <li>Kasir dapat notifikasi + jumlah pesanan (tombol &amp; menu)</li>
+            <li>No. meja &amp; nama pelayan ikut tercetak di struk</li>
+            <li>Stok baru terpotong saat kasir menyelesaikan bayar — tetap akurat</li>
+            <li>Bisa banyak pelayan sekaligus, semua masuk ke satu kasir</li>
+            <li>Jalan di jaringan lokal (WiFi/hotspot) tanpa internet</li>
+          </ul>
+        </div>
+        <span class="feat-toggle">Lihat detail ▾</span>
+      </div>
+      <div class="feat" onclick="toggleFeat(this)">
         <div class="ico">🏬</div><h3>Multi-Cabang</h3>
         <p>Kelola banyak toko dari satu aplikasi. Pindahkan kasir antar cabang, laporan terpisah per cabang.</p>
         <div class="feat-more">
@@ -335,6 +352,8 @@
             <li>Tetap jalan penuh walau internet mati</li>
             <li>Wajib ganti kata sandi default demi keamanan</li>
             <li>Hak akses bertingkat per pengguna</li>
+            <li>Pengaman akun: reset password admin diverifikasi via kontak pemilik terdaftar</li>
+            <li>Kode Pemulihan Admin untuk reset PIN darurat secara offline</li>
           </ul>
         </div>
         <span class="feat-toggle">Lihat detail ▾</span>
@@ -499,6 +518,7 @@
       <details class="qa"><summary>Printer apa yang didukung?</summary><p>Printer termal 58mm &amp; 80mm (ESC/POS) via USB, Bluetooth, atau driver Windows. Juga bisa cetak lewat dialog printer biasa.</p></details>
       <details class="qa"><summary>Bagaimana cara aktivasi setelah beli?</summary><p>Anda akan menerima kunci lisensi. Buka aplikasi → Pengaturan &amp; Akun → 🔑 Lisensi Aplikasi → tempel kunci → Aktifkan. Selesai!</p></details>
       <details class="qa"><summary>Apakah menerima pembayaran QRIS kena biaya kami?</summary><p>Tidak dari aplikasi. Biaya QRIS (MDR) mengikuti penyedia QRIS Anda (mis. DANA), bukan aplikasi ini.</p></details>
+      <details class="qa"><summary>Bagaimana cara kerja fitur Pesanan Keliling?</summary><p>Pelayan cukup membuka alamat kasir di browser HP/tablet (mis. <code>http://192.168.1.7:9100/waiter.html</code>) — tanpa memasang aplikasi. Pelayan memilih barang dari katalog kasir lalu mengirim pesanan; kasir menerima notifikasi, memuatnya ke keranjang, lalu menyelesaikan pembayaran. No. meja &amp; nama pelayan ikut tercetak di struk. Semua lewat WiFi/hotspot lokal, tanpa internet.</p></details>
     </div>
   </div>
 </section>
